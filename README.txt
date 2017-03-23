@@ -1,1 +1,2 @@
-SZCZÊŒÆ BO¯E!!!
+SZCZÊŒï¿½ BOï¿½E!!!
+w sumie to Niech BÄ™dzie pochwalony Jezus Chrystus
