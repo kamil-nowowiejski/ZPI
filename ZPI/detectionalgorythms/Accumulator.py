@@ -5,6 +5,7 @@ import math
 import cv2
 import copy
 
+
 class Accumulator:
     log = []
 
@@ -33,7 +34,7 @@ class Accumulator:
             shape = single_detected_shape["shapes"][0]
             while y < (len(shape) -1):
                 #cv2.line(mat, (shape[y][0][0], shape[y][0][1]), (shape[y+1][0][0], shape[y+1][0][1]),single_detected_shape["color"], 3)
-                cv2.line(mat, (shape[y][0][0], shape[y][0][1]), (shape[y+1][0][0], shape[y+1][0][1]),(255,0,0), 3)
+                cv2.line(mat, (shape[y][0][0], shape[y][0][1]), (shape[y+1][0][0], shape[y+1][0][1]),(0,0,255), 3)
                 y+=1
 
 

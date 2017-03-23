@@ -2,8 +2,8 @@
 import cv2
 import numpy as np
 
-from Accumulator import Accumulator
-from CameraManager import CameraManager
+from ZPI.detectionalgorythms.Accumulator import Accumulator
+
 
 class ObjectDetector:
 
@@ -12,12 +12,10 @@ class ObjectDetector:
     last_mean_colors = []
     logger = None
     acu = None
-    cm = None
 
     def __init__(self):
 
         self.acu = Accumulator()
-        self.cm = CameraManager()
         return
 
 
@@ -38,7 +36,7 @@ class ObjectDetector:
         cnt=0
         for single_contour in contours:
             e = cv2.arcLength(single_contour, True)
-            shape = cv2.approxPolyDP(single_contour, e * 0.02  ,closed=True)
+            shape = cv2.approxPolyDP(single_contour, e * 0.02 , closed=True)
             if cv2.contourArea(single_contour) < 500 or cv2.isContourConvex(single_contour):
                 continue
             self.last_detected_shapes.insert(cnt,shape)
@@ -53,30 +51,24 @@ class ObjectDetector:
             i += 1
         return True
 
-    def run(self):
+    def run(self, mat):
         while True:
-            mat = self.cm.getNextFrame()
-            #mat = cv2.imread("a.jpg")
+            #mat = self.cm.getNextFrame()
+            #mat = cv2.imread("IMG2.png")
             if not self.getDetectedObjects(mat):
                 return
+
             i=0
             for shape in self.last_detected_shapes:
-
                 self.acu.addShape(shape, self.last_mean_colors[i])
                 i+=1
             ret = self.acu.newFrame(mat)
 
-            #cv2.imshow("xxxx",mat)
-            #cv2.waitKey(1)
-
-            #ret = False
-
             if(ret != False):
-                cv2.imshow("xxxx", mat)
+                cv2.imshow("Object Detector", mat)
                 cv2.waitKey(1)
-                #return ret
+                return ret
             else:
                 continue
-
 
 
