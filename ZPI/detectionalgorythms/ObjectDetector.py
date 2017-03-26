@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 from ZPI.detectionalgorythms.Accumulator import Accumulator
-
+import CornerDetector as cd
 
 class ObjectDetector:
 
@@ -21,11 +21,16 @@ class ObjectDetector:
 
     def getDetectedObjects(self, mat):
         gray = cv2.cvtColor(mat, cv2.COLOR_BGR2GRAY)
-        img_filt = cv2.medianBlur(gray, 7)
+        img_filt = cv2.medianBlur(gray, 5)
 
+        img_th = cv2.Canny(img_filt, 30,40)
+        kernel = np.ones((2, 2), np.uint8)
+        img_th = cv2.dilate(img_th, None, iterations=1)
+        img_th = cv2.erode(img_th, None, iterations=1)
+        img_th = cv2.dilate(img_th, kernel, iterations=1)
 
-        img_th = cv2.Canny(img_filt, 8, 20)
-
+        cv2.imshow('canny first', img_th)
+        cv2.waitKey(1)
 
         height, width, depth = mat.shape
         contours, hierarchy = cv2.findContours(img_th, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -35,6 +40,7 @@ class ObjectDetector:
         self.last_mean_colors = []
         cnt=0
         for single_contour in contours:
+
             e = cv2.arcLength(single_contour, True)
             shape = cv2.approxPolyDP(single_contour, e * 0.02 , closed=True)
             if cv2.contourArea(single_contour) < 500 or cv2.isContourConvex(single_contour):
@@ -42,6 +48,7 @@ class ObjectDetector:
             self.last_detected_shapes.insert(cnt,shape)
             self.last_detected_countours.insert(cnt,single_contour)
             cnt += 1
+
         i = 0
         for h,cnt in enumerate(self.last_detected_countours):
             mask = np.zeros(gray.shape,np.uint8)
@@ -70,5 +77,3 @@ class ObjectDetector:
                 return ret
             else:
                 continue
-
-
