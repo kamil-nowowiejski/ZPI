@@ -13,7 +13,7 @@ objectDetector = ObjectDetector()
 
 while True:
     frame = cameraManager.getNextFrame()
-    #cd.shiTomasiDetection(frame, maxCorners=200, minDistance=5, qualityLevel=0.01)
-    scene = objectDetector.run(frame)
+    cd.shiTomasiDetection(frame, maxCorners=200, minDistance=5, qualityLevel=0.01)
+    #scene = objectDetector.run(frame)
     #other detections
 
