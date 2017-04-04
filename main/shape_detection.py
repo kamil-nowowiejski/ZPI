@@ -2,6 +2,8 @@ from rdp import rdp
 import numpy as np
 import cv2
 
+from main.Enums.Shapes import Shape
+
 
 def _align_points(points):
     if points.shape[0] > 0 and points.shape[1] == 2:
@@ -70,18 +72,18 @@ def detect_shape(points):
             epsilon = point[1]
     epsilon = epsilon / 100.0
     if len(points) == 1:
-        return 'point'
+        return Shape.POINT
     elif len(points) == 2:
-        return 'line'
+        return Shape.LINE
     elif len(points) == 3:
         angles = _angles(points)
         if abs(angles[0] - angles[1]) < np.pi / 50:
             if abs(angles[0] - angles[2]) < np.pi / 50:
-                return 'equilateral triangle'
+                return Shape.EQUILATERAL_TRIANGLE
             else:
-                return 'isosceles triangle'
+                return Shape.ISOSCELES_TRIANGLE
         else:
-            return 'triangle'
+            return Shape.TRIANGLE
     elif len(points) == 4:
         angles = _angles(points)
         edges = _edges(points)
@@ -89,32 +91,32 @@ def detect_shape(points):
                         angles[2] - np.deg2rad(90)) < np.pi / 50 and abs(angles[3] - np.deg2rad(90)) < np.pi / 50:
             if abs(edges[0] - edges[1]) < epsilon and abs(edges[0] - edges[2]) < epsilon and abs(
                             edges[0] - edges[3]) < epsilon:
-                return 'square'
+                return Shape.SQUARE
             else:
-                return 'rectangle'
+                return Shape.RECTANGLE
         elif abs(angles[0] - angles[2]) < np.pi / 50 and abs(angles[1] - angles[3]) < np.pi / 50:
             if abs(edges[0] - edges[1]) < epsilon and abs(edges[0] - edges[2]) < epsilon and abs(
                             edges[0] - edges[3]) < epsilon:
-                return 'rhombus'
+                return Shape.RHOMBUS
             else:
-                return 'parallelogram'
+                return Shape.PARALLELOGRAM
         elif abs(angles[0] + angles[1] - np.pi) < np.pi / 50 or abs(angles[1] + angles[2] - np.pi) < np.pi / 50 or abs(
                             angles[2] + angles[3] - np.pi) < np.pi / 50 or abs(
                             angles[3] + angles[0] - np.pi) < np.pi / 50:
-            return 'trapezium'
+            return Shape.TRAPEZIUM
         elif (abs(edges[0] - edges[1]) < epsilon and abs(edges[2] - edges[3]) < epsilon) or (abs(
                     edges[1] - edges[2]) < epsilon and abs(edges[3] - edges[0]) < epsilon):
-            return 'kite'
+            return Shape.KITE
         else:
-            return 'quadrilateral'
+            return Shape.QUADRILLATERAL
     elif len(points) == 5:
-        return 'pentagon'
+        return Shape.PENTAGON
     elif len(points) == 6:
-        return 'hexagon'
+        return Shape.HEXAGON
     elif len(points) == 7:
-        return 'heptagon'
+        return Shape.HEPTAGON
     elif len(points) == 8:
-        return 'octagon'
+        return Shape.OCTAGON
     elif len(points) >= 9:
         int_points = []
         for point in points:
@@ -130,10 +132,10 @@ def detect_shape(points):
         fit /= len(points)
         if fit < epsilon:
             if abs(ellipse[1][0] - ellipse[1][1]) < epsilon * 2:
-                return 'circle'
+                return Shape.CIRCLE
             else:
-                return 'ellipse'
+                return Shape.ELIPSE
         else:
-            return 'polygon'
+            return Shape.POLYGON
     else:
-        return 'invalid'
+        return Shape.INVALID
