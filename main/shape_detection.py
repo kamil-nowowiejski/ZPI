@@ -108,7 +108,7 @@ def detect_shape(points):
                     edges[1] - edges[2]) < epsilon and abs(edges[3] - edges[0]) < epsilon):
             return Shape.KITE
         else:
-            return Shape.QUADRILLATERAL
+            return Shape.QUADRILATERAL
     elif len(points) == 5:
         return Shape.PENTAGON
     elif len(points) == 6:
@@ -134,7 +134,7 @@ def detect_shape(points):
             if abs(ellipse[1][0] - ellipse[1][1]) < epsilon * 2:
                 return Shape.CIRCLE
             else:
-                return Shape.ELIPSE
+                return Shape.ELLIPSE
         else:
             return Shape.POLYGON
     else:

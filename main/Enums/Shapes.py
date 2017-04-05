@@ -11,13 +11,13 @@ class Shape(Enum):
     RHOMBUS = 7
     PARALLELOGRAM = 8
     TRAPEZIUM = 9
-    QUADRILLATERAL = 10
+    QUADRILATERAL = 10
     PENTAGON = 11
     HEXAGON = 12
     HEPTAGON = 13
     OCTAGON = 14
     CIRCLE = 15
-    ELIPSE = 16
+    ELLIPSE = 16
     POLYGON = 17
     KITE = 18
     INVALID = 19
