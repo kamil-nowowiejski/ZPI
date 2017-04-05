@@ -6,6 +6,8 @@ color - tuple(lower_bound, upper_bound), where lower_bound and upper_bound are t
 Hue is value from [0,180], not [0,360]
 frame - image tu analyze
 '''
+
+
 def detect(color, frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -34,20 +36,25 @@ def detect(color, frame):
 
     return convertNumpyShapeToMatrixOfPoints(result_shape)
 
+
 def convertNumpyShapeToMatrixOfPoints(numpyShape):
     result = []
-    numberOfVertexes = numpyShape.shape[0]
-    for i in range(0, numberOfVertexes):
-        x = numpyShape[i][0][0]
-        y = numpyShape[i][0][1]
-        result.append([x, y])
-    return np.array(result)
+    if numpyShape is not None:
+        numberOfVertexes = numpyShape.shape[0]
+        for i in range(0, numberOfVertexes):
+            x = numpyShape[i][0][0]
+            y = numpyShape[i][0][1]
+            result.append([x, y])
+        return np.array(result)
+
 
 def getMinimumBound():
     return (0, 86, 6)
 
+
 def getMaximumBound():
     return (179, 255, 255)
+
 
 def getColorBounds(colorId):
     lower_s = 86
@@ -64,6 +71,7 @@ def getColorBounds(colorId):
         Color.VIOLET: ((142.5, lower_s, lower_v), (171, upper_s, upper_v)),
     }
     return bounds[colorId]
+
 
 class Color(Enum):
     RED = 1

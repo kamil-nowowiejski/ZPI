@@ -5,6 +5,9 @@ import cv2
 from main.Enums.Shapes import Shape
 
 
+eps = 20.0
+
+
 def _align_points(points):
     if points.shape[0] > 0 and points.shape[1] == 2:
         x = points[0][0]
@@ -29,7 +32,7 @@ def _rdp_reduction(points):
             scale = point[0]
         if point[1] > scale:
             scale = point[1]
-    reduced = rdp(points, scale / 100)
+    reduced = rdp(points, scale / eps)
     if reduced.shape[0] == 2 and np.array_equal(reduced[0], reduced[1]):
         return np.array([reduced[0]])
     else:
@@ -70,15 +73,16 @@ def detect_shape(points):
             epsilon = point[0]
         if point[1] > epsilon:
             epsilon = point[1]
-    epsilon = epsilon / 100.0
+    epsilon = epsilon / eps
+    angular_epsilon = np.pi / (eps / 2.0)
     if len(points) == 1:
         return Shape.POINT
     elif len(points) == 2:
         return Shape.LINE
     elif len(points) == 3:
         angles = _angles(points)
-        if abs(angles[0] - angles[1]) < np.pi / 50:
-            if abs(angles[0] - angles[2]) < np.pi / 50:
+        if abs(angles[0] - angles[1]) < angular_epsilon:
+            if abs(angles[0] - angles[2]) < angular_epsilon:
                 return Shape.EQUILATERAL_TRIANGLE
             else:
                 return Shape.ISOSCELES_TRIANGLE
@@ -87,22 +91,25 @@ def detect_shape(points):
     elif len(points) == 4:
         angles = _angles(points)
         edges = _edges(points)
-        if abs(angles[0] - np.deg2rad(90)) < np.pi / 50 and abs(angles[1] - np.deg2rad(90)) < np.pi / 50 and abs(
-                        angles[2] - np.deg2rad(90)) < np.pi / 50 and abs(angles[3] - np.deg2rad(90)) < np.pi / 50:
+        if abs(angles[0] - np.deg2rad(90)) < angular_epsilon and abs(
+                        angles[1] - np.deg2rad(90)) < angular_epsilon and abs(
+                        angles[2] - np.deg2rad(90)) < angular_epsilon and abs(
+                        angles[3] - np.deg2rad(90)) < angular_epsilon:
             if abs(edges[0] - edges[1]) < epsilon and abs(edges[0] - edges[2]) < epsilon and abs(
                             edges[0] - edges[3]) < epsilon:
                 return Shape.SQUARE
             else:
                 return Shape.RECTANGLE
-        elif abs(angles[0] - angles[2]) < np.pi / 50 and abs(angles[1] - angles[3]) < np.pi / 50:
+        elif abs(angles[0] - angles[2]) < angular_epsilon and abs(angles[1] - angles[3]) < angular_epsilon:
             if abs(edges[0] - edges[1]) < epsilon and abs(edges[0] - edges[2]) < epsilon and abs(
                             edges[0] - edges[3]) < epsilon:
                 return Shape.RHOMBUS
             else:
                 return Shape.PARALLELOGRAM
-        elif abs(angles[0] + angles[1] - np.pi) < np.pi / 50 or abs(angles[1] + angles[2] - np.pi) < np.pi / 50 or abs(
-                            angles[2] + angles[3] - np.pi) < np.pi / 50 or abs(
-                            angles[3] + angles[0] - np.pi) < np.pi / 50:
+        elif abs(angles[0] + angles[1] - np.pi) < angular_epsilon or abs(
+                angles[1] + angles[2] - np.pi) < angular_epsilon or abs(
+                angles[2] + angles[3] - np.pi) < angular_epsilon or abs(
+                angles[3] + angles[0] - np.pi) < angular_epsilon:
             return Shape.TRAPEZIUM
         elif (abs(edges[0] - edges[1]) < epsilon and abs(edges[2] - edges[3]) < epsilon) or (abs(
                     edges[1] - edges[2]) < epsilon and abs(edges[3] - edges[0]) < epsilon):
@@ -115,22 +122,18 @@ def detect_shape(points):
         return Shape.HEXAGON
     elif len(points) == 7:
         return Shape.HEPTAGON
-    elif len(points) == 8:
-        return Shape.OCTAGON
-    elif len(points) >= 9:
+    elif len(points) >= 8:
         int_points = []
         for point in points:
-            int_points.append([int(point[0] * 100), int(point[1] * 100)])
+            int_points.append([int(point[0]), int(point[1])])
         ellipse = cv2.fitEllipse(np.array(int_points))
-        ellipse = (
-            (ellipse[0][0] / 100.0, ellipse[0][1] / 100.0), (ellipse[1][0] / 100.0, ellipse[1][1] / 100.0), ellipse[2])
         fit = 0
         for point in points:
             pos_x = (point[0] - ellipse[0][0]) * np.cos(-ellipse[2]) - (point[1] - ellipse[0][1]) * np.sin(-ellipse[2])
             pos_y = (point[0] - ellipse[0][0]) * np.sin(-ellipse[2]) - (point[1] - ellipse[0][1]) * np.cos(-ellipse[2])
             fit += abs((pos_x/ellipse[1][0])*(pos_x/ellipse[1][0]) + (pos_y/ellipse[1][1])*(pos_y/ellipse[1][1]) - 0.25)
         fit /= len(points)
-        if fit < epsilon:
+        if float(fit) < epsilon:
             if abs(ellipse[1][0] - ellipse[1][1]) < epsilon * 2:
                 return Shape.CIRCLE
             else:
