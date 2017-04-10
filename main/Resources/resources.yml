@@ -1,0 +1,7 @@
+sql:
+  connection: Resources\Database\database.db
+  create: Resources\SQL\create.sql
+  insert:
+    cuboid: Resources\SQL\insert_cuboid.sql
+    sphere: Resources\SQL\insert_sphere.sql
+  select: Resources\SQL\select.sql
