@@ -1,3 +1,13 @@
+# resource  res_name: resource
+#
+# dict      dict_name:
+#             item1: something
+#             item2: something else
+#
+# list      list_name:
+#             - item at [0]
+#             - next item
+
 sql:
   connection: Resources\Database\database.db
   create: Resources\SQL\create.sql
@@ -5,3 +15,4 @@ sql:
     cuboid: Resources\SQL\insert_cuboid.sql
     sphere: Resources\SQL\insert_sphere.sql
   select: Resources\SQL\select.sql
+  constraint: (cuboid_id is not null and sphere_id is null) or (cuboid_id is null and sphere_id is not null)

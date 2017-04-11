@@ -3,6 +3,7 @@ import sqlite3 as sql
 import Object as o
 from os.path import isfile
 from resources import res
+from enum import Enum
 
 
 def _create_database():
@@ -35,12 +36,12 @@ def insert(obj):
     """Insert object into database"""
     connection = _connect()
     cursor = connection.cursor()
-    if type(obj) is o.Cuboid:
+    if isinstance(obj, o.Cuboid):
         with open(res('sql\\insert\\cuboid')) as script:
             commands = script.read().split(';')
             cursor.execute(commands[0], (None, obj.height.value, obj.width.value, obj.depth.value, obj.color.value))
             cursor.execute(commands[1], (None, cursor.lastrowid, None))
-    elif type(obj) is o.Sphere:
+    elif isinstance(obj, o.Sphere):
         with open(res('sql\\insert\\sphere')) as script:
             commands = script.read().split(';')
             cursor.execute(commands[0], (None, obj.size.value, obj.color.value))
@@ -50,7 +51,14 @@ def insert(obj):
 
 
 def select(**kwargs):
-    """Retrieve objects from database filtered by keyword arguments"""
+    """Retrieve objects from database filtered by keyword arguments
+    
+    examples:
+    select()
+    select(height=Object.Size.BIG)
+    select(width=8)  
+    select(color=Object.Color.GREEN, size=Object.Size.SMALL)
+    """
     connection = _connect()
     cursor = connection.cursor()
     with open(res('sql\\select')) as script:
@@ -58,12 +66,18 @@ def select(**kwargs):
         list = []
         if len(kwargs) > 0:
             for table in script:
-                table += 'WHERE '
+                table += ' WHERE '
                 for kw in kwargs:
-                    table += kw + ' ' + str(kwargs['kw']) + ', '
-                table = table[-2:]
-                cursor.execute(table)
-                list += cursor.fetchall()
+                    if isinstance(kwargs[kw], Enum):
+                        table += kw + '=' + str(kwargs[kw].value) + ' AND '
+                    else:
+                        table += kw + '=' + str(kwargs[kw]) + ' AND '
+                table = table[:-5]
+                try:
+                    cursor.execute(table)
+                    list += cursor.fetchall()
+                except sql.OperationalError:
+                    pass
         else:
             for table in script:
                 cursor.execute(table)
