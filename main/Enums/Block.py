@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Block(Enum):
     BALL = 0
     ROLLER = 1

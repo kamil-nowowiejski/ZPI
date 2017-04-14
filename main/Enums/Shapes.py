@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Shape(Enum):
     POINT = 0
     LINE = 1
