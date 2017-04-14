@@ -1,4 +1,4 @@
-from main.BlockDetection import recogniseBlock
+from main.block_detection import recogniseBlock
 from main.Enums.Block import Block
 from main.Enums.Shapes import Shape
 import pytest

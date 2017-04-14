@@ -1,1 +1,7 @@
-pip install --upgrade rdp, numpy, pyyaml, pytest, coverage, pytest-cov
+pip install --upgrade rdp
+pip install --upgrade numpy
+pip install --upgrade pyyaml
+pip install --upgrade pytest
+pip install --upgrade coverage
+pip install --upgrade pytest-cov
+pip install --upgrade enum

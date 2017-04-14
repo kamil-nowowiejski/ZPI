@@ -1,13 +1,41 @@
+from enum import Enum
+
+
+class Size(Enum):
+    SMALL = 1
+    MEDIUM = 2
+    BIG = 4
+
+
+class Color(Enum):
+    RED = 1
+    ORANGE = 2
+    YELLOW = 4
+    GREEN = 8
+    BLUE = 16
+    VIOLET = 32
+
+
 class Object:
 
-    color = None
-    shape = None
-    symbols = None
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
 
-    def __init__(self):
-        pass
 
-    def __init__(self, color, shape, symbols):
+class Cuboid(Object):
+
+    def __init__(self, height, width, depth, color, id=None):
+        Object.__init__(self, id)
+        self.height = height
+        self.width = width
+        self.depth = depth
         self.color = color
-        self.shape = shape
-        self.symbols = symbols
+
+
+class Sphere(Object):
+
+    def __init__(self, size, color, id=None):
+        Object.__init__(self, id)
+        self.size = size
+        self.color = color

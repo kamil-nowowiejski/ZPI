@@ -16,3 +16,19 @@ sql:
     sphere: Resources\SQL\insert_sphere.sql
   select: Resources\SQL\select.sql
   constraint: (cuboid_id is not null and sphere_id is null) or (cuboid_id is null and sphere_id is not null)
+
+logger:
+  url:
+    base: 127.0.0.1:8080
+    agents: /api/acl_agents
+    presence_requests: /api/acl_presencerequests
+    objects: /api/acl_registeredobjects
+    features: /api/acl_features
+    assessments: /api/acl_assessments
+    communicative_actions: /api/communicativeactions
+    locations: /api/acl_locations
+    readouts: /api/acl_readouts
+    graphical_readouts: /api/acl_graphicalreadouts
+  precence_type:
+    start: start_presence
+    end: end_presence
