@@ -18,9 +18,12 @@ class Color(Enum):
 
 class Object:
 
-    def __init__(self, id, name):
+    def __init__(self, id, name, color, main_shape, symbols_list=None):
         self.id = id
         self.name = name
+        self.color = color
+        self.main_shape = main_shape
+        self.symbols_list = symbols_list
 
 
 class Cuboid(Object):

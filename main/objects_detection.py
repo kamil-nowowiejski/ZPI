@@ -3,7 +3,7 @@ import numpy as np
 import contour_detection as cd
 import shape_detection as sd
 from Enums.Color import Color
-from object import Object
+from Object import Object
 
 
 def detect_objects(frame):
@@ -23,15 +23,13 @@ def detect_objects(frame):
 
 def _calculate_object_from_contour(color, contour, frame):
 
-    x, y, w, h = cv2.boundingRect(contour)
-    sub_img = frame[y:y + h, x:x + w]
     main_shape = sd.detect_shape(cd.convert_numpy_array_for_shape_detection(contour))
-    symbols_list = _find_symbols_in_range(color, sub_img)
+    mask = np.zeros(frame.shape, np.uint8)
+    cv2.fillPoly(mask, [contour], (255, 255, 255))
+    mask = cv2.bitwise_and(mask, frame)
+    symbols_list = _find_symbols_in_range(color, mask)
 
-    bounding_point = np.array([[x, y], [x+w, y], [x+w, y+h], [x, y+h]], np.int32)
-
-    cv2.fillPoly(frame, [bounding_point], 0)
-    return Object(color, main_shape, symbols_list)
+    return Object(None, None, color, main_shape, symbols_list)
 
 
 def _find_symbols_in_range(main_color, sub_img):
@@ -45,7 +43,16 @@ def _find_symbols_in_range(main_color, sub_img):
         if symbol_contours is not None:
             for single_contour in symbol_contours:
                 symbol_shape = sd.detect_shape(cd.convert_numpy_array_for_shape_detection(single_contour))
-                symbol = Object(symbol_color, symbol_shape, [])
+                symbol = Object(None, None, symbol_color, symbol_shape, [])
                 symbols_list.append(symbol)
 
     return symbols_list
+
+
+def rectangles_union(a, b):
+
+    x = min(a[0], b[0])
+    y = min(a[1], b[1])
+    w = max(a[0]+a[2], b[0]+b[2]) - x
+    h = max(a[1]+a[3], b[1]+b[3]) - y
+    return x, y, w, h
