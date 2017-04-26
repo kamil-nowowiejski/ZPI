@@ -36,16 +36,19 @@ def insert(obj):
     """Insert object into database"""
     connection = _connect()
     cursor = connection.cursor()
-    if isinstance(obj, o.Cuboid):
-        with open(res('sql\\insert\\cuboid')) as script:
-            commands = script.read().split(';')
-            cursor.execute(commands[0], (None, obj.height.value, obj.width.value, obj.depth.value, obj.color.value))
-            cursor.execute(commands[1], (None, cursor.lastrowid, None))
-    elif isinstance(obj, o.Sphere):
-        with open(res('sql\\insert\\sphere')) as script:
-            commands = script.read().split(';')
-            cursor.execute(commands[0], (None, obj.size.value, obj.color.value))
-            cursor.execute(commands[1], (None, None, cursor.lastrowid))
+    symbols = []
+    for symbol in obj.symbols:
+        symbol.type = symbol.type.value
+        symbol.color = symbol.type.value
+        cursor.execute(res('sql\\insert\\shape'), [None, symbol.type, symbol.height, symbol.width, symbol.color])
+        symbols.append(cursor.lastrowid)
+    obj.type = obj.type.value
+    obj.color = obj.color.value
+    cursor.execute(res('sql\\insert\\shape'), [None, obj.type, obj.height, obj.width, obj.color])
+    shape = cursor.lastrowid
+    for symbol in symbols:
+        cursor.execute(res('sql\\insert\\symbol'), [shape, symbol])
+    cursor.execute(res('sql\\insert\\object'), [None, shape])
     connection.commit()
     connection.close()
 

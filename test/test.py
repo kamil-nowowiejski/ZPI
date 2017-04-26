@@ -9,5 +9,7 @@ cv2.waitKey(0)
 print sd.detect_shape(shape)
 '''
 
-import main.logger as log
-print log._action_time()
+from main.HTTPServer import HTTPServer
+
+s = HTTPServer()
+s.run()

@@ -1,25 +1,24 @@
-CREATE TABLE Cuboids
+CREATE TABLE Shapes
 (
     Id INTEGER PRIMARY KEY,
     Height INTEGER,
     Width INTEGER,
-    Depth INTEGER,
-    Color INTEGER
+    Color INTEGER,
+    Type INTEGER
 );
 
-CREATE TABLE Spheres
+CREATE TABLE Symbols
 (
-    Id INTEGER PRIMARY KEY,
-    Size INTEGER,
-    Color INTEGER
+    Shape INTEGER NOT NULL,
+    Symbol INTEGER NOT NULL,
+    PRIMARY KEY(Shape, Symbol),
+    FOREIGN KEY (Shape) REFERENCES Shapes(Id),
+    FOREIGN KEY (Symbol) REFERENCES Shapes(Id)
 );
 
 CREATE TABLE Objects
 (
     Id INTEGER PRIMARY KEY,
-    Cuboid INTEGER,
-    Sphere INTEGER,
-    FOREIGN KEY (Cuboid) REFERENCES Cuboids(Id),
-    FOREIGN KEY (Sphere) REFERENCES Spheres(Id),
-    CONSTRAINT ck_OnlyOne CHECK((Cuboid IS NULL AND Sphere IS NOT NULL) OR (Cuboid IS NOT NULL AND Sphere IS NULL))
+    Shape INTEGER,
+    FOREIGN KEY (Shape) REFERENCES Shapes(Id)
 );

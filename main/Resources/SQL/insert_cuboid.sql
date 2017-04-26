@@ -1,1 +1,1 @@
-INSERT INTO Cuboids VALUES(?, ?, ?, ?, ?);INSERT INTO Objects VALUES(?, ?, ?)
+INSERT INTO Shapes VALUES(?, ?)

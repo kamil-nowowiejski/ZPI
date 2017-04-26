@@ -12,8 +12,9 @@ sql:
   connection: Resources\Database\database.db
   create: Resources\SQL\create.sql
   insert:
-    cuboid: Resources\SQL\insert_cuboid.sql
-    sphere: Resources\SQL\insert_sphere.sql
+    object: INSERT INTO Objects VALUES(?, ?)
+    shape: INSERT INTO Shapes VALUES(?, ?, ?, ?, ?)
+    symbol: INSERT INTO Symbols VALUES(?, ?)
   select: Resources\SQL\select.sql
   constraint: (cuboid_id is not null and sphere_id is null) or (cuboid_id is null and sphere_id is not null)
 

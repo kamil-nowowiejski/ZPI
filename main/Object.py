@@ -22,19 +22,12 @@ class Object:
         self.id = id
 
 
-class Cuboid(Object):
+class Shape(Object):
 
-    def __init__(self, height, width, depth, color, id=None):
+    def __init__(self, type, height, width, color, symbols=[], id=None):
         Object.__init__(self, id)
+        self.type = type
         self.height = height
         self.width = width
-        self.depth = depth
         self.color = color
-
-
-class Sphere(Object):
-
-    def __init__(self, size, color, id=None):
-        Object.__init__(self, id)
-        self.size = size
-        self.color = color
+        self.symbols = symbols
