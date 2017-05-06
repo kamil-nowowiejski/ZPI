@@ -4,6 +4,7 @@ import database as db
 import logger as log
 import time
 
+
 class Main:
     exit = False
 

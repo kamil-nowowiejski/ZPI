@@ -1,10 +1,10 @@
 CREATE TABLE Shapes
 (
     Id INTEGER PRIMARY KEY,
+    Type INTEGER,
     Height INTEGER,
     Width INTEGER,
-    Color INTEGER,
-    Type INTEGER
+    Color INTEGER
 );
 
 CREATE TABLE Symbols

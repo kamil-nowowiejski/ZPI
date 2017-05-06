@@ -1,6 +1,24 @@
 from enum import Enum
 
 
+class Block(Enum):
+    BALL = 0
+    ROLLER = 1
+    CUBOID = 2
+    CUBE = 3
+    PYRAMID = 4
+    INVALID = 5
+
+
+class Color(Enum):
+    RED = 0
+    ORANGE = 1
+    YELLOW = 2
+    GREEN = 3
+    BLUE = 4
+    VIOLET = 5
+
+
 class Shape(Enum):
     POINT = 0
     LINE = 1
@@ -24,3 +42,7 @@ class Shape(Enum):
     INVALID = 19
 
 
+class Size(Enum):
+    SMALL = 0
+    MEDIUM = 1
+    BIG = 2

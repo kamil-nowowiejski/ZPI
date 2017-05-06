@@ -1,7 +1,7 @@
 from rdp import rdp
 import numpy as np
 import cv2
-from Enums.Shapes import Shape
+from enums import Shape
 
 
 eps = 20.0

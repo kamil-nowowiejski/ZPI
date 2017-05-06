@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import contour_detection as cd
 import shape_detection as sd
-from Enums.Color import Color
-from Object import Shape
+from enums import Color
+from object import Shape
 
 
 def detect_objects(frame):

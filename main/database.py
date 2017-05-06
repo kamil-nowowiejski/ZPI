@@ -1,9 +1,9 @@
 """Database storage system"""
 import sqlite3 as sql
-import Object as o
+import enums
+from object import Shape
 from os.path import isfile
 from resources import res
-from enum import Enum
 
 
 def _create_database():
@@ -22,73 +22,42 @@ def _connect():
     return sql.connect(res('sql\\connection'))
 
 
-def _insert(connection, table, *args):
-    script = 'INSERT INTO %s VALUES(' % table
-    values = [None]
-    for arg in args:
-        script += '?, '
-        values.append(arg)
-    script += '?);'
-    connection.cursor().execute(script, values)
-
-
 def insert(obj):
     """Insert object into database"""
     connection = _connect()
     cursor = connection.cursor()
     symbols = []
     for symbol in obj.symbols:
-        symbol.type = symbol.type.value
-        symbol.color = symbol.type.value
-        cursor.execute(res('sql\\insert\\shape'), [None, symbol.type, symbol.height, symbol.width, symbol.color])
+        cursor.execute(res('sql\\insert\\shape'),
+                       [None, symbol.type.value, symbol.height.value, symbol.width.value, symbol.color.value])
         symbols.append(cursor.lastrowid)
-    obj.type = obj.type.value
-    obj.color = obj.color.value
-    cursor.execute(res('sql\\insert\\shape'), [None, obj.type, obj.height, obj.width, obj.color])
+    cursor.execute(res('sql\\insert\\shape'),
+                   [None, obj.type.value, obj.height.value, obj.width.value, obj.color.value])
     shape = cursor.lastrowid
     for symbol in symbols:
         cursor.execute(res('sql\\insert\\symbol'), [shape, symbol])
     cursor.execute(res('sql\\insert\\object'), [None, shape])
+    cursor.close()
     connection.commit()
     connection.close()
 
 
-def select(**kwargs):
-    """Retrieve objects from database filtered by keyword arguments
-    
-    examples:
-    select()
-    select(height=Object.Size.BIG)
-    select(width=8)  
-    select(color=Object.Color.GREEN, size=Object.Size.SMALL)
-    """
+def select():
+    """Retrieve objects from database"""
     connection = _connect()
     cursor = connection.cursor()
     with open(res('sql\\select')) as script:
         script = script.read().replace('\n', ' ').split(';')
-        list = []
-        if len(kwargs) > 0:
-            for table in script:
-                table += ' WHERE '
-                for kw in kwargs:
-                    if isinstance(kwargs[kw], Enum):
-                        table += kw + '=' + str(kwargs[kw].value) + ' AND '
-                    else:
-                        table += kw + '=' + str(kwargs[kw]) + ' AND '
-                table = table[:-5]
-                try:
-                    cursor.execute(table)
-                    list += cursor.fetchall()
-                except sql.OperationalError:
-                    pass
-        else:
-            for table in script:
-                cursor.execute(table)
-                list += cursor.fetchall()
-    connection.close()
-    for i in range(len(list)):
-        if list[i][1] is not None:
-            list[i] = o.Cuboid(o.Size(list[i][4]), o.Size(list[i][5]), o.Size(list[i][6]), o.Color(list[i][7]), list[i][0])
-        elif list[i][2] is not None:
-            list[i] = o.Sphere(o.Size(list[i][4]), o.Color(list[i][5]), list[i][0])
+        cursor.execute(script[0])
+        objects = cursor.fetchall()
+        cursor.execute(script[1])
+        symbols = cursor.fetchall()
+        cursor.close()
+        connection.close()
+    list = []
+    for obj in objects:
+        syms = []
+        for sym in [s for s in symbols if s[0] == obj[1]]:
+            syms.append(Shape(enums.Shape(sym[3]), enums.Size(sym[4]), enums.Size(sym[5]), enums.Color(sym[6])))
+        list.append(Shape(enums.Shape(obj[3]), enums.Size(obj[4]), enums.Size(obj[5]), enums.Color(obj[6]), syms, obj[0]))
     return list

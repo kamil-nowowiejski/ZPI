@@ -1,44 +1,36 @@
-from enum import Enum
-
-
-class Size(Enum):
-    SMALL = 1
-    MEDIUM = 2
-    BIG = 4
-
-
-class Color(Enum):
-    RED = 1
-    ORANGE = 2
-    YELLOW = 4
-    GREEN = 8
-    BLUE = 16
-    VIOLET = 32
+"""Data model"""
 
 
 class Object:
 
-    def __init__(self, id, name, color, main_shape, symbols_list=None):
+    def __init__(self, id):
         self.id = id
-        self.name = name
-        self.color = color
-        self.main_shape = main_shape
-        self.symbols_list = symbols_list
 
 
-class Cuboid(Object):
+class Shape(Object):
 
-    def __init__(self, height, width, depth, color, id=None):
+    def __init__(self, type, height, width, color, symbols=[], id=None):
         Object.__init__(self, id)
+        self.type = type
         self.height = height
         self.width = width
-        self.depth = depth
         self.color = color
+        self.symbols = symbols
 
+    def features(self):
+        feature = [0] * len(self.type.__objclass__)
+        feature[self.type.value] = 1
+        result = feature
+        feature = [0] * len(self.height.__objclass__)
+        feature[self.height.value] = 1
+        result += feature
+        feature = [0] * len(self.width.__objclass__)
+        feature[self.width.value] = 1
+        result += feature
+        feature = [0] * len(self.color.__objclass__)
+        feature[self.color.value] = 1
+        result += feature
+        for symbol in self.symbols:
+            result += symbol.features()
+        return result
 
-class Sphere(Object):
-
-    def __init__(self, size, color, id=None):
-        Object.__init__(self, id)
-        self.size = size
-        self.color = color

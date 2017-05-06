@@ -16,7 +16,6 @@ sql:
     shape: INSERT INTO Shapes VALUES(?, ?, ?, ?, ?)
     symbol: INSERT INTO Symbols VALUES(?, ?)
   select: Resources\SQL\select.sql
-  constraint: (cuboid_id is not null and sphere_id is null) or (cuboid_id is null and sphere_id is not null)
 
 logger:
   url:
@@ -33,3 +32,14 @@ logger:
   precence_type:
     start: start_presence
     end: end_presence
+
+serial:
+  port: /dev/ttyACM0
+  arduino:
+    run: '{"type": "agent", "cmd": "go"}'
+    run_left: '{"type": "agent", "cmd": "sL"}'
+    run_right: '{"type": "agent", "cmd": "sR"}'
+    run_distance: '{"type": "agent", "cmd": "goF", "val": ?}'
+    turn: '{"type": "agent", "cmd": "turn", "val": ?}'
+    stop: '{"type": "agent", "cmd": "stop"}'
+    set_speed: '{"type": "agent", "cmd": "speed", "setSpeed": ?}'

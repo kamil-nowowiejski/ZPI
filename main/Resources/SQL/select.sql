@@ -1,5 +1,5 @@
 SELECT *
-FROM Objects INNER JOIN Cuboids ON Objects.Cuboid = Cuboids.Id;
+FROM Objects INNER JOIN Shapes ON Objects.Shape = Shapes.Id;
 
 SELECT *
-FROM Objects INNER JOIN Spheres ON Objects.Sphere = Spheres.Id;
+FROM Symbols INNER JOIN Shapes ON Symbols.Symbol = Shapes.Id;
