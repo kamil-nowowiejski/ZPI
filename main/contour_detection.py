@@ -54,6 +54,23 @@ def maximum_bound():
 
 
 def color_bounds(color_id):
+    lower_s = 100
+    upper_s = 255
+    lower_v = 50
+    upper_v = 255
+
+    bounds = {
+        Color.RED: ((144, lower_s, lower_v), (7, upper_s, upper_v)),
+        Color.YELLOW: ((20, lower_s, lower_v), (35, upper_s, upper_v)),
+        Color.GREEN: ((36, lower_s, lower_v), (75, upper_s, upper_v)),
+        Color.BLUE: ((76, lower_s, lower_v), (130, upper_s, upper_v)),
+        Color.VIOLET: ((131, lower_s, lower_v), (143, upper_s, upper_v)),
+    }
+
+    return bounds[color_id]
+
+'''
+def color_bounds(color_id):
     lower_s = 86
     upper_s = 255
     lower_v = 6
@@ -68,3 +85,4 @@ def color_bounds(color_id):
         Color.VIOLET: ((142.5, lower_s, lower_v), (171, upper_s, upper_v)),
     }
     return bounds[color_id]
+'''

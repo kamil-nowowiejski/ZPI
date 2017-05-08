@@ -12,11 +12,10 @@ class Block(Enum):
 
 class Color(Enum):
     RED = 0
-    ORANGE = 1
-    YELLOW = 2
-    GREEN = 3
-    BLUE = 4
-    VIOLET = 5
+    YELLOW = 1
+    GREEN = 2
+    BLUE = 3
+    VIOLET = 4
 
 
 class Shape(Enum):
