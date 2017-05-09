@@ -9,13 +9,13 @@
 #             - next item
 
 sql:
-  connection: Resources\Database\database.db
-  create: Resources\SQL\create.sql
+  connection: Resources/Database/database.db
+  create: Resources/SQL/create.sql
   insert:
     object: INSERT INTO Objects VALUES(?, ?)
     shape: INSERT INTO Shapes VALUES(?, ?, ?, ?, ?)
     symbol: INSERT INTO Symbols VALUES(?, ?)
-  select: Resources\SQL\select.sql
+  select: Resources/SQL/select.sql
 
 logger:
   url:
@@ -35,6 +35,7 @@ logger:
 
 serial:
   port: /dev/ttyACM0
+  speed: 38400
   arduino:
     run: '{"type": "agent", "cmd": "go"}'
     run_left: '{"type": "agent", "cmd": "sL"}'
