@@ -43,3 +43,32 @@ serial:
     turn: '{"type": "agent", "cmd": "turn", "val": ?}'
     stop: '{"type": "agent", "cmd": "stop"}'
     set_speed: '{"type": "agent", "cmd": "speed", "setSpeed": ?}'
+
+tcp_server:
+  ip: 127.0.0.1
+  server_port: 20001
+  client_port: 20002
+  buffer_size: 2048
+
+http_server:
+  ip: 127.0.0.1
+  port: 20003
+
+agent_info:
+  ip: 127.0.0.1
+  name: Andrzej
+  id: 1
+  description: Agent tstowy
+  type:
+  sensors:
+    sensor_1:
+      name:
+      accuracy:
+      unit_type:
+      type:
+    sensor_2:
+      name:
+      accuracy:
+      unit_type:
+      type:
+
