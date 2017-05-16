@@ -1,55 +1,62 @@
-import serial
-import json
-from threading import Timer
-from resources import res
+from threading import Thread
+from time import sleep
+import arduino
+from enums import MoveState as State
 
 
-def run_left(time=0):
-    ser = serial.Serial(res('serial\\port'), res('serial\\speed'))
-    ser.write(res('serial\\arduino\\run_left'))
-    ser.close()
-    if time > 0:
-        Timer(time, stop()).start()
+class Move:
 
+    def __init__(self):
+        self._state = State.DISCONNECTED
+        self.server = arduino.ArduinoServer()
+        self._thread = Thread(target=self._go)
+        self._stop = False
 
-def run_right(time=0):
-    ser = serial.Serial(res('serial\\port'), res('serial\\speed'))
-    ser.write(res('serial\\arduino\\run_right'))
-    ser.close()
-    if time > 0:
-        Timer(time, stop()).start()
+    @property
+    def has_events(self):
+        return len(self.server.queue) > 0
 
+    @property
+    def state(self):
+        return self._state
 
-def run(time=0):
-    ser = serial.Serial(res('serial\\port'), res('serial\\speed'))
-    ser.write(res('serial\\arduino\\run'))
-    ser.close()
-    if time > 0:
-        Timer(time, stop()).start()
+    def event(self):
+        if self.has_events:
+            return self.server.queue.pop(0)
 
+    def connect(self):
+        self.server.start()
+        self._state = State.IDLE
 
-def stop():
-    ser = serial.Serial(res('serial\\port'), res('serial\\speed'))
-    ser.write(res('serial\\arduino\\stop'))
-    line = ser.readline()
-    data = json.loads(line)
-    ser.close()
-    return data['distance']
+    def go(self):
+        if self._state is not State.DISCONNECTED:
+            thread = Thread(target=self._go)
+            thread.start()
+            self._state = State.MOVING
 
+    def _go(self):
+        self.server.turn(135)
+        while not self._stop:
+            if self.server.queue[-1] == 'stop':
+                break
+            elif self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        if self._stop:
+            self._state = State.IDLE
+            return
+        self.server.go_distance(1)
+        while not self._stop:
+            if self.server.queue[-1] == 'stop':
+                break
+            elif self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        self._state = State.IDLE
 
-def turn(angle):
-    ser = serial.Serial(res('serial\\port'), res('serial\\speed'))
-    ser.write(res('serial\\arduino\\turn').replace('?', str(angle)))
-    ser.close()
-
-
-def run_distance(distance):
-    ser = serial.Serial(res('serial\\port'), res('serial\\speed'))
-    ser.write(res('serial\\arduino\\run_distance').replace('?', str(distance)))
-    ser.close()
-
-
-def set_speed(speed):
-    ser = serial.Serial(res('serial\\port'), res('serial\\speed'))
-    ser.write(res('serial\\arduino\\set_speed').replace('?', str(speed)))
-    ser.close()
+    def close(self):
+        self._stop = True
+        self.server.stop()
+        self.server.close()

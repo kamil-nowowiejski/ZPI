@@ -3,7 +3,7 @@ import cv2
 import main.logger as log
 from main.resources import res
 from main.Agent import Agent, Sensor
-from main.Object import Object
+from main.object import Object
 
 
 def test_agent_registration_server_response():

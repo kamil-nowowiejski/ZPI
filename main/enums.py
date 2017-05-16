@@ -45,3 +45,10 @@ class Size(Enum):
     SMALL = 0
     MEDIUM = 1
     BIG = 2
+
+
+class MoveState(Enum):
+    DISCONNECTED = 0
+    IDLE = 1
+    MOVING = 2
+    STUCK = 3
