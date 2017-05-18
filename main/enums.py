@@ -47,6 +47,13 @@ class Size(Enum):
     BIG = 2
 
 
+class MoveState(Enum):
+    DISCONNECTED = 0
+    IDLE = 1
+    MOVING = 2
+    STUCK = 3
+
+
 class ColorSpace(Enum):
     BGR = 0
     HSV = 1
