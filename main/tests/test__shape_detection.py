@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
-from main.shape_detection import _align_points
-from main.shape_detection import detect_shape
 from main.Enums.Shapes import Shape
+
+from main.ImageProcessing.shape_detection import _align_points
+from main.ImageProcessing.shape_detection import detect_shape
 
 
 def test__align_points():

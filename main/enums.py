@@ -45,3 +45,9 @@ class Size(Enum):
     SMALL = 0
     MEDIUM = 1
     BIG = 2
+
+
+class ColorSpace(Enum):
+    BGR = 0
+    HSV = 1
+    HSL = 2

@@ -1,8 +1,10 @@
+import time
+
 import cv2
-import objects_detection as od
+
 import database as db
 import logger as log
-import time
+from main.ImageProcessing import objects_detection as od
 
 
 class Main:

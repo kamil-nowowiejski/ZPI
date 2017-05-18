@@ -1,7 +1,8 @@
 ''' Prosze mi tego pliku nie zmieniac ~ Kucu, 2017 '''
 
 import cv2
-from main.objects_detection import ObjectDetector
+
+from main.ImageProcessing.objects_detection import ObjectDetector
 from main.enums import Color
 
 cam = cv2.VideoCapture(0)
@@ -11,7 +12,13 @@ for i in range(20):
 
 while True:
     _, im = cam.read()
+
     x = od.detect_objects(im, False)
+    for obj in x:
+        print str(obj.color) + ' ' + str(obj.type) + ' ' + str(obj.width) + ' ' + str(obj.height) + ' ' + str(len(obj.symbols))
+
+    print ' '
+    print ' '
     for single_contour in od.detected_contours:
         draw_color = (0, 0, 0)
         if single_contour[0] is Color.RED:

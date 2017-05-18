@@ -1,7 +1,8 @@
-from main.block_detection import recogniseBlock
 from main.Enums.Block import Block
 from main.Enums.Shapes import Shape
-import pytest
+
+from main.ImageProcessing.block_detection import recogniseBlock
+
 
 def test1():
     assert recogniseBlock(Shape.CIRCLE, Shape.CIRCLE, Shape.CIRCLE, Shape.CIRCLE) is Block.BALL

@@ -1,27 +1,38 @@
-import main.contour_detection as od
 import cv2
-import numpy as np
+import main.ImageProcessing.contour_detection as cd
+from main.enums import Color
+
+'''
+There is no 100% guarantee that triangle will be detected as three point curve.
+Sometimes it is recognized as 4 points curve but it is still ok, because extra point is very close to
+one of other three main points. That gives chance to reduce this extra point using RDP algorithm - shape_detection in
+our case.
+'''
 
 
-def detect_shape_in_image_test():
-    frame = cv2.imread('images/test_img5.jpg')
-    frame = cv2.resize(frame, None, fx=0.25, fy=0.25, interpolation=cv2.INTER_AREA)
-    shape = od.detect_contours(od.Color.RED, frame)
-
-    cv2.drawContours(frame, [shape], -1, (255, 255, 255), 3)
-
-    cv2.imshow('Original', frame)
-    cv2.waitKey(0)
+def test_detect_contours_blue_pentagon():
+    frame = cv2.imread('images/obj_det_blue_pentagon.bmp')
+    contours = cd.detect_contours(Color.BLUE, frame)
+    assert len(contours) is 1
+    assert contours[0].shape[0] is 5 or contours[0].shape[0] is 6
 
 
-def color_bounds_test():
-    img = cv2.imread('hsv_color_test.jpg')
-    colors = [od.Color.RED, od.Color.ORANGE, od.Color.YELLOW, od.Color.GREEN, od.Color.BLUE, od.Color.VIOLET]
-    for color in colors:
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        colorBounds = od.get_color_bounds(color)
-        mask = cv2.inRange(hsv, colorBounds[0], colorBounds[1])
-        cv2.imshow('Mask', mask)
-        cv2.waitKey(0)
+def test_detect_contours_red_square():
+    frame = cv2.imread('images/obj_det_blue_pentagon.bmp')
+    contours = cd.detect_contours(Color.RED, frame)
+    assert len(contours) is 1
+    assert contours[0].shape[0] is 4 or contours[0].shape[0] is 5
 
-detect_shape_in_image_test()
+
+def test_detect_contours_green_triangle():
+    frame = cv2.imread('images/obj_det_green_triangle.bmp')
+    contours = cd.detect_contours(Color.GREEN, frame)
+    assert len(contours) is 1
+    assert contours[0].shape[0] is 3 or contours[0].shape is 4
+
+
+def test_detect_contours_blue_rectangle():
+    frame = cv2.imread('images/obj_det_green_triangle.bmp')
+    contours = cd.detect_contours(Color.BLUE, frame)
+    assert len(contours) is 1
+    assert contours[0].shape[0] is 3 or contours[0].shape[0] is 4
