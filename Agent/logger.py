@@ -189,7 +189,7 @@ def _action_sender(action_sender_id):
 def _action_time():
     return'"actionTime":"' + datetime.now().strftime('%Y-%m-%d' + 'T' + '%H:%M:%S') + '"'
 
-from Agent import Agent
+from agent import Agent
 agent = Agent(2, '', '', '', [])
 agent.name = 'Andrzej'
 result = agent_registration(agent, None, None, 'SL', None, None)

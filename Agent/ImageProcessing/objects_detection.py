@@ -3,8 +3,8 @@ import numpy as np
 import shape_detection as sd
 import pictures_transformations as pt
 import contour_detection as cd
-from main.enums import Color, ColorSpace
-from main.object import Shape
+from Agent.enums import Color, ColorSpace
+from Agent.object import Shape
 
 
 class ObjectDetector:

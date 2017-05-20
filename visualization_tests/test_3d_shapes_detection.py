@@ -10,7 +10,7 @@
 
 import cv2
 
-import main.ImageProcessing.block_detection as bd
+import Agent.ImageProcessing.block_detection as bd
 
 capture = cv2.VideoCapture(1)
 

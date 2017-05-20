@@ -1,9 +1,9 @@
 import json
 import cv2
-import main.logger as log
-from main.resources import res
-from main.Agent import Agent, Sensor
-from main.object import Object
+import Agent.logger as log
+from Agent.resources import res
+from Agent.agent import Agent, Sensor
+from Agent.object import Object
 
 
 def test_agent_registration_server_response_empty_strings():

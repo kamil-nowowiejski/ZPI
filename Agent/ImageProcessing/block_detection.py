@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-import main.ImageProcessing.contour_detection as cd
-import main.ImageProcessing.shape_detection as sd
+import Agent.ImageProcessing.contour_detection as cd
+import Agent.ImageProcessing.shape_detection as sd
 
 
 class BlockDetector:

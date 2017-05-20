@@ -1,7 +1,7 @@
-from main.Enums.Block import Block
-from main.Enums.Shapes import Shape
+from Agent.Enums.Block import Block
+from Agent.Enums.Shapes import Shape
 
-from main.ImageProcessing.block_detection import recogniseBlock
+from Agent.ImageProcessing.block_detection import recogniseBlock
 
 
 def test1():

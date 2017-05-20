@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from main.enums import ColorSpace
+from Agent.enums import ColorSpace
 
 
 def percentage_of_bright_pixels(im, color_space):

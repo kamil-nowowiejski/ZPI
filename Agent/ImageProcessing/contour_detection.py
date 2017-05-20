@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from main.enums import Color
+from Agent.enums import Color
 '''
 color - tuple(lower_bound, upper_bound), where lower_bound and upper_bound are tuples representing HSV color space
 Hue is value from [0,180], not [0,360]

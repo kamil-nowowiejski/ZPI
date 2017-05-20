@@ -1,5 +1,6 @@
 from threading import Thread
 from time import sleep
+
 import arduino
 from enums import MoveState as State
 

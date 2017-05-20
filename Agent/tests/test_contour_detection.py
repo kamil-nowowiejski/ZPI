@@ -1,6 +1,6 @@
 import cv2
-import main.ImageProcessing.contour_detection as cd
-from main.enums import Color
+import Agent.ImageProcessing.contour_detection as cd
+from Agent.enums import Color
 
 '''
 There is no 100% guarantee that triangle will be detected as three point curve.

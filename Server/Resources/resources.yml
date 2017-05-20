@@ -1,0 +1,17 @@
+# Server resources
+#
+# resource  res_name: resource
+#
+# dict      dict_name:
+#             item1: something
+#             item2: something else
+#
+# list      list_name:
+#             - item at [0]
+#             - next item
+
+tcp_server:
+  ip: 127.0.0.1
+  server_port: 20001
+  client_port: 20002
+  buffer_size: 2048

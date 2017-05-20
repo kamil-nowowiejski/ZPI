@@ -1,7 +1,7 @@
 import cv2
-import main.ImageProcessing.objects_detection as od
-from main.object import Shape
-from main.enums import Color, Shape
+import Agent.ImageProcessing.objects_detection as od
+from Agent.object import Shape
+from Agent.enums import Color, Shape
 
 
 def test_detect_object_red_rectangle_with_green_triangle():

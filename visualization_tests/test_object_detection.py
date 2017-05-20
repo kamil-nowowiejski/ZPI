@@ -2,8 +2,8 @@
 
 import cv2
 
-from main.ImageProcessing.objects_detection import ObjectDetector
-from main.enums import Color
+from Agent.ImageProcessing.objects_detection import ObjectDetector
+from Agent.enums import Color
 
 cam = cv2.VideoCapture(0)
 od = ObjectDetector()

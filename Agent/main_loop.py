@@ -1,12 +1,12 @@
-from HTTPServer import HTTPServer
 from move import Move
 import cv2
-import objects_detection as od
+import ImageProcessing.objects_detection as od
 import database as db
 import logger as log
-from Agent import Agent
-import time
+from agent import Agent, Sensor
+from time import sleep
 from enums import MoveState
+from TCPConnections import TCPAgent
 
 
 class Main:
@@ -14,26 +14,26 @@ class Main:
     stop = [False]
 
     def __init__(self):
-        self.server = HTTPServer()
+        self.server = TCPAgent()
         self.move = Move()
         self.camera_manager = cv2.VideoCapture()
         self.detector = od.ObjectDetector()
 
     def _setup(self):
         self.server.start()
-        log.agent_registration(Agent(2, 'Andrzej', 'Agent Andrzej', 'agent', []))
+        log.agent_registration(Agent(2, 'Andrzej', 'Agent Andrzej', 'agent', [Sensor('s1', 0.1, 'm', 'type1')]))
         self.move.connect()
 
     def _clean(self):
         self.camera_manager.release()
         self.move.close()
-        self.server.close()
+        self.server.stop()
 
     def _loop(self):
         while not self.stop[0]:
             self._observe()
             self._move()
-            time.sleep(5)
+            sleep(5)
 
     def _observe(self):
         if self.move.state is MoveState.IDLE:

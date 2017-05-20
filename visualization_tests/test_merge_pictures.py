@@ -1,6 +1,6 @@
 import cv2
 
-import main.ImageProcessing.pictures_transformations as pm
+import Agent.ImageProcessing.pictures_transformations as pm
 
 capture = cv2.VideoCapture(0)
 for _ in range(0,50):

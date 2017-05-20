@@ -1,8 +1,9 @@
 """Database storage system"""
 import sqlite3 as sql
+from os.path import isfile
+
 import enums
 from object import Shape
-from os.path import isfile
 from resources import res
 
 

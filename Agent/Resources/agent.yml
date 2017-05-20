@@ -1,0 +1,33 @@
+# Agent resources
+#
+# resource  res_name: resource
+#
+# dict      dict_name:
+#             item1: something
+#             item2: something else
+#
+# list      list_name:
+#             - item at [0]
+#
+
+tcp_server:
+  ip: 127.0.0.1
+  server_port: 20001
+  client_port: 20002
+  buffer_size: 2048
+
+agent_info:
+  ip: 127.0.0.1
+  name: Andrzej
+  id: 1
+  description: Agent tstowy
+  type:
+  sensors:
+    - name:
+      accuracy:
+      unit_type:
+      type:
+    - name:
+      accuracy:
+      unit_type:
+      type:
