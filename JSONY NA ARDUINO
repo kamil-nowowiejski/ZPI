@@ -1,0 +1,15 @@
+{"type": "agent", "cmd": "go"} - jazda
+{"type": "agent", "cmd": "goF", "val": 10} - przejedz 10 cm
+{"type": "agent", "srv": "tV", "val": 10} - zmiana ustawienia kamery Vertycalnie
+{"type": "agent", "srv": "tH", "val": 10} - zmiana ustawien kamery Horyzontalnie
+{"type": "agent", "cmd": "road"} - zwracanie przebytej drogi
+{"type": "agent", "cmd": "clearRoad"} - ustawienie drogi = 0
+{"type": "agent", "cmd": "dist"} - zwraca odleglosc do obiektu
+{"type": "agent", "cmd": "turn", "val": 10} - skręt w prawo o 10 stopni ( poprawnie do 180 stopni )
+{"type": "agent", "cmd": "turn", "val": -10} - skręt w lewo o 10 stopni --||--
+{"type": "agent", "cmd": "sL"} - uruchom lewy silnik
+{"type": "agent", "cmd": "sR"} - uruchom prawy silnik
+{"type": "agent", "cmd": "speed", "setSpeed": 1000} - uruchom oba silniki dla wartości 1000 ( prędkość z jaką poruszają się w miarę ok )
+
+
+UWAGA: Skręcanie działa tylko dla wartości +-90 i +-180 -> prubuję dojść dlaczego, ale niesety mi się nie udaje narazie 
