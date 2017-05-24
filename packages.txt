@@ -6,3 +6,4 @@ pip install --upgrade coverage
 pip install --upgrade pytest-cov
 pip install --upgrade enum
 pip install --upgrade pyserial
+pip install --upgrade pillow

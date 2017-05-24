@@ -46,6 +46,11 @@ serial:
     turn: '{"type": "agent", "cmd": "turn", "val": ?}'
     stop: '{"type": "agent", "cmd": "stop"}'
     set_speed: '{"type": "agent", "cmd": "speed", "setSpeed": ?}'
+    road: '{"type": "agent", "cmd": "road"}'
+    clear: '{"type": "agent", "cmd": "clearRoad"}'
+    distance: '{"type": "agent", "cmd": "dist"}'
+    camera_v: '{"type": "agent", "srv": "tV", "val": ?}'
+    camera_h: '{"type": "agent", "srv": "tH", "val": ?}'
 
 tcp_server:
   ip: 127.0.0.1

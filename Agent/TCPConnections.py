@@ -1,9 +1,13 @@
 import socket
 from threading import Thread
 from time import sleep
-
 import main_loop
-from resources import res
+from resources import res, ares
+import numpy as np
+from cStringIO import StringIO
+
+import random as r
+import cv2
 
 
 class TCPServer(Thread):
@@ -31,25 +35,22 @@ class TCPServer(Thread):
     def _receive(self, connection):
         chunks = ''
         buffer_size = res('tcp_server\\buffer_size')
-        errors = 0
         timeouts = 0
         while True:
             try:
                 chunk = connection.recv(buffer_size)
             except socket.timeout:
-                sleep(1)
+                sleep(0.5)
                 timeouts += 1
-                if timeouts == 10:
+                if timeouts == 5:
                     raise socket.timeout
             except socket.error:
-                errors += 1
-                if errors == 5:
-                    break
+                break
             else:
                 if not chunk:
                     break
                 chunks += chunk
-                errors = 0
+                timeouts = 0
         if chunks:
             print '%d <- %s' % (self.address[1], chunks)
         return chunks
@@ -57,26 +58,33 @@ class TCPServer(Thread):
 
 class TCPAgent(TCPServer):
 
-    def __init__(self):
+    def __init__(self, context):
         super(TCPAgent, self).__init__(('', 0))
         self.name = 'Agent'
+        self.context = context
+        self.connected = False
+        self.feed = False
+        self.autonomous = True
 
     def run(self):
         self.receive_socket.bind(self.address)
         self.receive_socket.settimeout(2)
         self.receive_socket.listen(1)
-        self.address = (res('tcp_server\\ip'), self.receive_socket.getsockname()[1])
+        self.address = (ares('agent_info\\ip'), self.receive_socket.getsockname()[1])
         self.send_socket.connect((res('tcp_server\\ip'), res('tcp_server\\server_port')))
-        self._send('REGISTER|%s:%d|Andrzej' % (self.address[0], self.address[1]))
+        # temporary workaround
+        # r.seed(None)
+        # self._send('REGISTER|%s:%d|%d' % (self.address[0], self.address[1], r.randint(1000, 9999)))
+        self._send('REGISTER|%s:%d|%s' % (self.address[0], self.address[1], ares('agent_info\\name')))
         timeouts = 0
         print 'agent started'
         while not self._stop:
             try:
                 connection, client_address = self.receive_socket.accept()
             except socket.timeout:
-                sleep(2)
+                sleep(0.5)
                 timeouts += 1
-                if timeouts == 10:
+                if timeouts == 5:
                     self.stop()
             except socket.error:
                 print 'agent error'
@@ -91,68 +99,60 @@ class TCPAgent(TCPServer):
                         print 'agent error'
                         self.stop()
                     else:
-                        if message.split('|')[0] == 'REGISTER':
-                            send_address = (message.split('|')[1].split(':')[0], int(message.split('|')[1].split(':')[1]))
-                            self.send_socket.close()
-                            self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            self.send_socket.connect(send_address)
-                            print 'agent connected'
-                        elif message == 'SHUTDOWN':
-                            main_loop.Main.stop[0] = True
+                        self.process_request(message)
         print 'agent stopped'
         self.send_socket.close()
         self.receive_socket.close()
 
+    def process_request(self, message):
+        if message.split('|')[0] == 'REGISTER':
+            send_address = (message.split('|')[1].split(':')[0], int(message.split('|')[1].split(':')[1]))
+            self.send_socket.close()
+            self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.send_socket.connect(send_address)
+            print 'agent connected'
+        elif message == 'SHUTDOWN':
+            main_loop.Main.stop[0] = True
+        elif message == 'LOGIC_ON':
+            self.autonomous = True
+            self._send('LOGIC_ON')
+        elif message == 'LOGIC_OFF':
+            self.autonomous = False
+            self._send('LOGIC_OFF')
+        elif message == 'FEED_ON':
+            self.feed = True
+            self._send('FEED_ON')
+        elif message == 'FEED_OFF':
+            self.feed = False
+            self._send('FEED_OFF')
+        elif message == 'DETECT':
+            _, image = self.context.camera_manager.read()
+            objects = self.context.detector.detect_objects(image)
+            for obj in objects:
+                self.context.db.insert(obj)
+            self.send_detection(objects)
+        elif message.split('|')[0] == 'PROCESS':
+            pass
 
-'''
-def remotely_process_image(image):
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = (res('tcp_server\\ip'), res('tcp_server\\server_port'))
-    send_socket.connect(server_address)
+    def send_feed(self, image):
+        sio = StringIO()
+        np.savez_compressed(sio, frame=image)
+        sio.seek(0)
+        data = sio.read()
+        self._send('FEED|%s' % data)
 
-    f = StringIO()
-    np.savez_compressed(f, frame=image)
-    f.seek(0)
-    out = f.read()
-    _send_message(send_socket, out)
-    send_socket.close()
+    def send_detection(self, objects):
+        message = 'DETECT|%d' % len(objects)
+        for obj in objects:
+            message += '|%d|%d|%d|%d|%d' % (obj.type.value, obj.height.value, obj.width.value,
+                                            obj.color.value, len(obj.symbols))
+            for sym in obj.symbols:
+                message += '|%d|%d|%d|%d' % (sym.type.value, sym.height.value, sym.width.value, sym.color.value)
+        self._send(message)
 
-    receive_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    my_address = (res('agent_info\\ip'), res('tcp_server\\client_port'))
-    receive_socket.bind(my_address)
-    receive_socket.listen(1)
-    connection, _ = receive_socket.accept()
-    msg = _receive_response(connection)
-    receive_socket.close()
-
-    return msg
-
-
-class TCPServer:
-
-    def __init__(self):
-        pass
-
-    def run(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        my_address = (res('tcp_server\\ip'), res('tcp_server\\server_port'))
-        sock.bind(my_address)
-        sock.listen(1)
-        print 'server started'
-        while True:
-            connection, client_address = sock.accept()
-            chunks = _receive_response(connection)
-            connection.close()
-
-            print 'received image'
-            image = np.load(StringIO(chunks))['frame']
-            ''''''here we do stuff with image''''''
-            message = 'ala ma kota'
-            time.sleep(3)
-
-            send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_address = (client_address[0], res('tcp_server\\client_port'))
-            send_socket.connect(server_address)
-            send_socket.sendall(message)
-            send_socket.close()
-'''
+    def process_image(self, image):
+        sio = StringIO()
+        np.savez_compressed(sio, frame=image)
+        sio.seek(0)
+        data = sio.read()
+        self._send('PROCESS|%s' % data)

@@ -10,24 +10,14 @@
 #             - item at [0]
 #
 
-tcp_server:
-  ip: 127.0.0.1
-  server_port: 20001
-  client_port: 20002
-  buffer_size: 2048
-
 agent_info:
   ip: 127.0.0.1
   name: Andrzej
   id: 1
-  description: Agent tstowy
+  description: Agent testowy
   type:
   sensors:
-    - name:
-      accuracy:
-      unit_type:
-      type:
-    - name:
-      accuracy:
-      unit_type:
+    - name: sen
+      accuracy: 0.1
+      unit_type: m
       type:
