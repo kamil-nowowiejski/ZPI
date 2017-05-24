@@ -1,3 +1,4 @@
+{"type": "agent", "cmd": "stop"} - zatrzymanie
 {"type": "agent", "cmd": "go"} - jazda
 {"type": "agent", "cmd": "goF", "val": 10} - przejedz 10 cm
 {"type": "agent", "srv": "tV", "val": 10} - zmiana ustawienia kamery Vertycalnie
