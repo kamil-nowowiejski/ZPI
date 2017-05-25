@@ -3,7 +3,7 @@ import Agent.ImageProcessing.objects_detection as od
 from Agent.object import Shape
 from Agent.enums import Color, Shape
 
-
+'''
 def test_detect_object_red_rectangle_with_green_triangle():
     detector = od.ObjectDetector()
     frame = cv2.imread('tests/images/obj_det_red_rectangle.bmp')
@@ -105,6 +105,15 @@ def test_detect_object_all_objects():
             obj = x
             break
     assert obj is not None
+
+'''
+
+def test_detect_object_green_triangle_pattern_horizontal_lines():
+    detector = od.ObjectDetector()
+    frame = cv2.imread('tests/images/obj_det_green_triangle_pattern_hor_lines.bmp')
+    objects_list = detector.detect_objects(frame, auto_contour_clear=False, prepare_image_befor_detection=False)
+
+    s = 1
 
 
 def _is_triangle(shape):

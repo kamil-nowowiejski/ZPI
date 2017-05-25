@@ -58,3 +58,13 @@ class ColorSpace(Enum):
     BGR = 0
     HSV = 1
     HSL = 2
+
+
+class Pattern(Enum):
+    HORIZONTAL_LINES = 0
+    VERTICAL_LINES = 1
+    LEFT_INCLINED_LINES = 2
+    RIGHT_INCLINED_LINES = 3
+    GRID = 4
+    INCLINED_GRID = 5
+    NONE = 6

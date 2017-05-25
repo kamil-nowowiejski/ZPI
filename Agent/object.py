@@ -10,12 +10,13 @@ class Object:
 
 class Shape(Object):
 
-    def __init__(self, type, height, width, color, symbols=[], id=None):
+    def __init__(self, type, height, width, color, pattern, symbols=[], id=None):
         Object.__init__(self, id)
         self.type = type
         self.height = height
         self.width = width
         self.color = color
+        self.pattern = pattern
         self.symbols = symbols
 
     def features(self):

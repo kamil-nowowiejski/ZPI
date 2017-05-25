@@ -21,8 +21,8 @@ def detect_contours(color, frame):
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
 
-    cnts, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[1]
     result_contours = []
     for single_contour in cnts:
         e = cv2.arcLength(single_contour, True)
@@ -54,13 +54,13 @@ def maximum_bound():
 
 
 def color_bounds(color_id):
-    lower_s = 100
+    lower_s = 0
     upper_s = 255
-    lower_v = 50
+    lower_v = 40
     upper_v = 255
 
     bounds = {
-        Color.RED: ((144, lower_s, lower_v), (7, upper_s, upper_v)),
+        Color.RED: ((144, lower_s, lower_v), (19, upper_s, upper_v)),
         Color.YELLOW: ((20, lower_s, lower_v), (35, upper_s, upper_v)),
         Color.GREEN: ((36, lower_s, lower_v), (75, upper_s, upper_v)),
         Color.BLUE: ((76, lower_s, lower_v), (130, upper_s, upper_v)),
@@ -68,6 +68,28 @@ def color_bounds(color_id):
     }
 
     return bounds[color_id]
+
+
+def color_from_bounds(color):
+    lower_s = 0
+    upper_s = 256
+    lower_v = 40
+    upper_v = 256
+
+    if not (color[1] in range(lower_s, upper_s) and color[2] in range(lower_v, upper_v)):
+        return None
+
+    if color[0] in range(144, 181) or color[0] in range(0, 20):
+         return Color.RED
+    if color[0] in range(20, 36):
+        return Color.YELLOW
+    if color[0] in range(36, 76):
+        return Color.GREEN
+    if color[0] in range(76, 131):
+        return Color.BLUE
+    if color[0] in range(131, 144):
+        return Color.VIOLET
+
 
 '''
 def color_bounds(color_id):

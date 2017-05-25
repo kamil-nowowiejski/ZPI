@@ -1,9 +1,10 @@
 ''' Prosze mi tego pliku nie zmieniac ~ Kucu, 2017 '''
 
 import cv2
-
+import Agent.ImageProcessing.pictures_transformations as pt
 from Agent.ImageProcessing.objects_detection import ObjectDetector
 from Agent.enums import Color
+from Agent.enums import ColorSpace
 
 cam = cv2.VideoCapture(0)
 od = ObjectDetector()
@@ -11,11 +12,17 @@ for i in range(20):
     cam.read()
 
 while True:
-    _, im = cam.read()
+    images = []
+    for i in range(1,10):
+        _, im = cam.read()
+        images.append(im)
+    im = pt.merge_pictures(images, ColorSpace.BGR, True)
 
     x = od.detect_objects(im, False)
     for obj in x:
         print str(obj.color) + ' ' + str(obj.type) + ' ' + str(obj.width) + ' ' + str(obj.height) + ' ' + str(len(obj.symbols))
+        for symbol in obj.symbols:
+            print '\t' + str(symbol.color) + ' ' + str(symbol.type) + ' ' + str(symbol.width) + ' ' + str(symbol.height)
 
     print ' '
     print ' '
