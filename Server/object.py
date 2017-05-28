@@ -1,5 +1,5 @@
 """Data model"""
-import Agent.enums as enums
+import enums as enums
 
 class Object:
 
