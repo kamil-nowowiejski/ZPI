@@ -11,7 +11,7 @@ def _align_points(points):
     if points.shape[0] > 0 and points.shape[1] == 2:
         x = points[0][0]
         y = points[0][1]
-        for point in points :
+        for point in points:
             if point[0] < x:
                 x = point[0]
             if point[1] < y:

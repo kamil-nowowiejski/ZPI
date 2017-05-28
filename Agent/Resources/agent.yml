@@ -21,3 +21,7 @@ agent_info:
       accuracy: 0.1
       unit_type: m
       type:
+
+camera_info:
+  horizontal_field_of_view: 62.2
+  vertical_field_of_view: 48.8

@@ -16,6 +16,7 @@ class Color(Enum):
     GREEN = 2
     BLUE = 3
     VIOLET = 4
+    NONE = 5
 
 
 class Shape(Enum):
@@ -41,12 +42,6 @@ class Shape(Enum):
     INVALID = 19
 
 
-class Size(Enum):
-    SMALL = 0
-    MEDIUM = 1
-    BIG = 2
-
-
 class MoveState(Enum):
     DISCONNECTED = 0
     IDLE = 1
@@ -68,3 +63,12 @@ class Pattern(Enum):
     GRID = 4
     INCLINED_GRID = 5
     NONE = 6
+
+
+class Size(Enum):
+    TINY = 0
+    SMALL = 1
+    MEDIUM = 2
+    BIG = 3
+    LARGE = 4
+    NONE = 5

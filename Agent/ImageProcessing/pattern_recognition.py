@@ -1,29 +1,23 @@
 import cv2
 import math
 import numpy as np
-from Agent.enums import Pattern
+import common_operations as common
+from Agent.enums import Pattern, Color
 
 
 def find_pattern(image):
+
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
 
     min_line_length = 100
-    lines = cv2.HoughLinesP(image=edges, rho=1, theta=np.pi / 180, threshold=85, lines=np.array([]), \
+    lines = cv2.HoughLinesP(image=edges, rho=1, theta=np.pi / 180, threshold=85, lines=np.array([]),
                             minLineLength=min_line_length, maxLineGap=200)
 
     if lines is None:
-        return Pattern.NONE
+        return Pattern.NONE, Color.NONE
 
-    a, b, c = lines.shape
-    for i in range(a):
-        begin = (lines[i][0][0], lines[i][0][1])
-        end = (lines[i][0][2], lines[i][0][3])
-        cv2.line(image, begin, end, (255, 255, 0), 2, cv2.LINE_AA)
-
-    cv2.imshow('ds',image)
-    cv2.waitKey(0)
-    pattern_color = _find_patterns_color(image)
+    pattern_color = _find_patterns_color(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
     pattern = _assume_pattern(lines)
     return pattern, pattern_color
 
@@ -37,9 +31,9 @@ def _assume_pattern(lines):
         angles.append(_line_angle((begin, end)))
 
     number_of_horizontal_lines = sum(i >= 170 or i <= 10 for i in angles)
-    number_of_vertical_lines = sum(i in range(80, 101) for i in angles)
-    number_of_left_inclined_lines = sum(i in range(101, 170) for i in angles)
-    number_of_right_inclined_lines = sum(i in range(11, 80) for i in angles)
+    number_of_vertical_lines = sum(80 <= i <= 100 for i in angles)
+    number_of_left_inclined_lines = sum(100 < i < 170 for i in angles)
+    number_of_right_inclined_lines = sum(10 < i < 80 for i in angles)
 
     if float(number_of_horizontal_lines) / len(angles) > 0.6:
         return Pattern.HORIZONTAL_LINES
@@ -77,8 +71,10 @@ def _line_angle(line):
 
 def _find_patterns_color(image):
     non_black_pixels = image[np.where((image != [0, 0, 0]).all(axis=2))]
+    if len(non_black_pixels) is 0:
+        return Color.NONE
     avg_color = (0., 0., 0.)
     for pixel in non_black_pixels:
         avg_color += pixel
     avg_color /= len(non_black_pixels)
-    return avg_color
+    return common.color_from_bounds(avg_color)

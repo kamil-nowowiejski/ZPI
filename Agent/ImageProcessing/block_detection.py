@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
-
-import Agent.ImageProcessing.contour_detection as cd
-import Agent.ImageProcessing.shape_detection as sd
+import common_operations as common
+import shape_detection as sd
 
 
 class BlockDetector:
@@ -29,7 +28,6 @@ class BlockDetector:
     def _assume_walls_shapes(self, image, contour):
         image = self._mask_for_single_block(image, contour)
 
-
         wall_contours, _ = cv2.findContours(image.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
         filtered_contours = []
@@ -43,7 +41,7 @@ class BlockDetector:
 
         wall_shapes = []
         for single_contour in filtered_contours:
-            converted = cd.convert_numpy_array_for_shape_detection(single_contour)
+            converted = common.convert_numpy_array_for_shape_detection(single_contour)
             wall_shapes.append(sd.detect_shape(converted))
         return wall_shapes
 
