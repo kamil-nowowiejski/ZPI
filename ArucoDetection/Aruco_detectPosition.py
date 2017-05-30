@@ -30,5 +30,5 @@ class MrkerDetector:
         corners, ids, rejectedImgPoints = aruco.detectMarkers(image, self.aruco_dict, parameters=self.parameters)
         if corners:
             rvecs, tvecs, objectPoints = aruco.estimatePoseSingleMarkers(corners, self.markerSize, cameraMatrix=self.camera_matrix,distCoeffs=self.dist_coeffs)
-            return tvecs[0]
-        else: return None
+            return rvecs, tvecs
+        else: return None, None
