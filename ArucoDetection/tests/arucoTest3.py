@@ -1,5 +1,5 @@
 import cv2
-import Aruco_detectPosition as aruco
+import ArucoDetection.Aruco_detectPosition as aruco
 
 cap = cv2.VideoCapture(1)
 x = aruco.MrkerDetector()
