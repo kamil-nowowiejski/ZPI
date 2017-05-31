@@ -7,6 +7,7 @@ from agent import Agent, Sensor
 from time import sleep
 from enums import MoveState
 from TCPConnections import TCPAgent
+from resources import ares
 
 
 class Main:
@@ -15,25 +16,29 @@ class Main:
 
     def __init__(self):
         self.server = TCPAgent(self)
-        #self.move = Move()
+        self.move = Move()
         self.camera_manager = cv2.VideoCapture()
         self.detector = od.ObjectDetector()
 
     def _setup(self):
         self.server.start()
-        log.agent_registration(Agent(2, 'Andrzej', 'Agent Andrzej', 'agent', [Sensor('s1', 0.1, 'm', 'type1')]))
-        #self.move.connect()
+        sensors = []
+        for sensor in ares('agent_info\\sensors'):
+            sensors.append(Sensor(sensor['name'], sensor['accuracy'], sensor['unit_type'], sensor['type']))
+        log.agent_registration(Agent(ares('agent_info\\id'), ares('agent_info\\name'), ares('agent_info\\description'),
+                                     ares('agent_info\\type'), sensors))
+        self.move.connect()
 
     def _clean(self):
         self.camera_manager.release()
-        #self.move.close()
+        self.move.close()
         self.server.stop()
 
     def _loop(self):
         while not self.stop[0]:
             if self.server.autonomous:
                 self._observe()
-                #self._move()
+                self._move()
                 sleep(5)
             if self.server.feed:
                 _, image = self.camera_manager.read()
@@ -50,8 +55,8 @@ class Main:
 
     def _move(self):
         pass
-        #if self.move.state is MoveState.IDLE:
-        #    self.move.go()
+        if self.move.state is MoveState.IDLE:
+            self.move.go()
 
     def run(self):
         self._setup()
