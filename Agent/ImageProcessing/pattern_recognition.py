@@ -3,16 +3,28 @@ import math
 import numpy as np
 import common_operations as common
 from Agent.enums import Pattern, Color
+from Agent.resources import ares
 
 
 def find_pattern(image):
+    """
+    Find pattern and its color in the given image
+    :param image: image where only pattern is visible, image must be in BGR color space
+    :return: tuple in form of (pattern, color_pattern), where
+            pattern is pattern id defined in class Pattern from enums.py,
+            pattern_color is color id defined in class Color from enums.py
+    """
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 50, 150)
+    canny_threshold_1 = ares('image_processing_params\\pattern_recognition\\canny_threshold_1')
+    canny_threshold_2 = ares('image_processing_params\\pattern_recognition\\canny_threshold_2')
+    edges = cv2.Canny(gray, canny_threshold_1, canny_threshold_2)
 
-    min_line_length = 100
-    lines = cv2.HoughLinesP(image=edges, rho=1, theta=np.pi / 180, threshold=85, lines=np.array([]),
-                            minLineLength=min_line_length, maxLineGap=200)
+    min_line_length = ares('image_processing_params\\pattern_recognition\\minimum_line_length')
+    hough_lines_threshold = ares('image_processing_params\\pattern_recognition\\hough_lines_threshold')
+    max_line_gap = ares('image_processing_params\\pattern_recognition\\max_line_gap')
+    lines = cv2.HoughLinesP(image=edges, rho=1, theta=np.pi / 180, threshold=hough_lines_threshold, lines=np.array([]),
+                            minLineLength=min_line_length, maxLineGap=max_line_gap)
 
     if lines is None:
         return Pattern.NONE, Color.NONE
@@ -23,6 +35,12 @@ def find_pattern(image):
 
 
 def _assume_pattern(lines):
+    """
+    Given ndarray containing lines of pattern assume its pattern
+    :param lines: ndarray containing line of pattern
+    :return: pattern id defined in class Pattern from enums.py
+    """
+
     number_of_lines, _, _ = lines.shape
     angles = []
     for i in range(number_of_lines):
@@ -30,27 +48,38 @@ def _assume_pattern(lines):
         end = (lines[i][0][2], lines[i][0][3])
         angles.append(_line_angle((begin, end)))
 
-    number_of_horizontal_lines = sum(i >= 170 or i <= 10 for i in angles)
-    number_of_vertical_lines = sum(80 <= i <= 100 for i in angles)
-    number_of_left_inclined_lines = sum(100 < i < 170 for i in angles)
-    number_of_right_inclined_lines = sum(10 < i < 80 for i in angles)
+    angle_epsilon = ares('image_processing_params\\pattern_recognition\\angle_epsilon')
+    number_of_horizontal_lines = sum(i >= 180 - angle_epsilon or i <= angle_epsilon for i in angles)
+    number_of_vertical_lines = sum(90 - angle_epsilon <= i <= 90 + angle_epsilon for i in angles)
+    number_of_left_inclined_lines = sum(90 + angle_epsilon < i < 180 - angle_epsilon for i in angles)
+    number_of_right_inclined_lines = sum(angle_epsilon < i < 90 - angle_epsilon for i in angles)
 
-    if float(number_of_horizontal_lines) / len(angles) > 0.6:
+    percentage_of_line_type_to_qualify_as_pattern = ares('image_processing_params\\pattern_recognition\\'
+                                                         'percentage_of_line_type_to_qualify_as_pattern')
+    if float(number_of_horizontal_lines) / len(angles) > percentage_of_line_type_to_qualify_as_pattern:
         return Pattern.HORIZONTAL_LINES
-    if float(number_of_vertical_lines) / len(angles) > 0.6:
+    if float(number_of_vertical_lines) / len(angles) > percentage_of_line_type_to_qualify_as_pattern:
         return Pattern.VERTICAL_LINES
-    if float(number_of_left_inclined_lines) / len(angles) > 0.6:
+    if float(number_of_left_inclined_lines) / len(angles) > percentage_of_line_type_to_qualify_as_pattern:
         return Pattern.LEFT_INCLINED_LINES
-    if float(number_of_right_inclined_lines) / len(angles) > 0.6:
+    if float(number_of_right_inclined_lines) / len(angles) > percentage_of_line_type_to_qualify_as_pattern:
         return Pattern.RIGHT_INCLINED_LINES
-    if float(number_of_vertical_lines) / len(angles) >= 0.3 and float(number_of_horizontal_lines) / len(angles) >= 0.3:
+    if float(number_of_vertical_lines) / len(angles) >= percentage_of_line_type_to_qualify_as_pattern / 2 and \
+       float(number_of_horizontal_lines) / len(angles) >= percentage_of_line_type_to_qualify_as_pattern / 2:
         return Pattern.GRID
-    if float(number_of_left_inclined_lines) / len(angles) >= 0.3 and float(number_of_right_inclined_lines) / len(angles) >= 0.3:
+    if float(number_of_left_inclined_lines) / len(angles) >= percentage_of_line_type_to_qualify_as_pattern / 2 and \
+       float(number_of_right_inclined_lines) / len(angles) >= percentage_of_line_type_to_qualify_as_pattern / 2:
         return Pattern.INCLINED_GRID
     return Pattern.NONE
 
 
 def _line_angle(line):
+    """
+    Calculates the agle of line
+    :param line: ndarray representing line
+    :return: angle of line in degrees
+    """
+
     a = line[0]
     b = line[1]
     if a[1] < b[1]:
@@ -70,6 +99,11 @@ def _line_angle(line):
 
 
 def _find_patterns_color(image):
+    """
+    Find color of pattern in image
+    :param image: image with only pattern present
+    :return: color id defined in class Color from enums.py
+    """
     non_black_pixels = image[np.where((image != [0, 0, 0]).all(axis=2))]
     if len(non_black_pixels) is 0:
         return Color.NONE

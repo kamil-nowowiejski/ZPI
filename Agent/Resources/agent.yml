@@ -25,3 +25,42 @@ agent_info:
 camera_info:
   horizontal_field_of_view: 62.2
   vertical_field_of_view: 48.8
+
+image_processing_params:
+  contour_area_noise_border: 500
+
+  colors:
+    min_color_bound_hsv: (0, 50, 40)
+    max_color_bound_hsv: (179, 255, 255)
+    red_hue_bound: (144, 11)
+    yellow_hue_bound: (12, 35)
+    green_hue_bound: (36, 75)
+    blue_hue_bound: (76, 130)
+    violet_hue_bound: (131, 143)
+
+  combined_objects_detecion:
+    canny_threshold_1: 50
+    canny_threshold_2: 500
+
+  image_preparetion:
+    dark_pixels_percentage_border: 0.4
+    gamma_increase: 2.0
+    number_of_quantizied_colors: 12
+
+  pattern_recognition:
+    canny_threshold_1: 50
+    canny_threshold_2: 150
+    minimum_line_length: 100
+    hough_lines_threshold: 85
+    max_line_gap: 200
+    angle_epsilon: 10
+    percentage_of_line_type_to_qualify_as_pattern: 0.6
+
+  pictures_merge:
+    dark_pixels_percentage_border: 0.3
+
+  size_discretization:
+    tiny_bounds: (0, 3)
+    small_bounds: (3, 6)
+    medium_bounds: (6, 9)
+    big_bounds: (9, 12)

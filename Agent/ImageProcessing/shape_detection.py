@@ -8,6 +8,11 @@ eps = 20.0
 
 
 def _align_points(points):
+    """
+    Translation of shape so the upper left corner be situated in point (0, 0)
+    :param points: list of points representing corners of the shape
+    :return: translated points
+    """
     if points.shape[0] > 0 and points.shape[1] == 2:
         x = points[0][0]
         y = points[0][1]
@@ -25,6 +30,11 @@ def _align_points(points):
 
 
 def _rdp_reduction(points):
+    """
+    Reduce number of points using Ramer-Douglas-Peucker algorithm
+    :param points: aligned list of points representing corners of the shape
+    :return: list of reduced points
+    """
     scale = points[0][0]
     for point in points:
         if point[0] > scale:
@@ -39,12 +49,23 @@ def _rdp_reduction(points):
 
 
 def _angle_between(vector_1, vector_2):
+    """
+    Calculates angle between two vectors
+    :param vector_1: first vector
+    :param vector_2: second vector
+    :return: angle between vectors in radians
+    """
     vector_1 = vector_1 / np.linalg.norm(vector_1)
     vector_2 = vector_2 / np.linalg.norm(vector_2)
     return np.arccos(np.clip(np.dot(vector_1, vector_2), -1.0, 1.0))
 
 
 def _angles(points):
+    """
+    Creates list of angles of given figure
+    :param points: list of points representing corners of the shape
+    :return: list of shape's angles
+    """
     if len(points) >= 3:
         angles = []
         for i in range(len(points) - 1):
@@ -56,6 +77,11 @@ def _angles(points):
 
 
 def _edges(points):
+    """
+    Creates list of edges lengths of given figure
+    :param points: list of points representing corners of the shape
+    :return: list of shape's edges lengths
+    """
     if len(points) >= 2:
         edges = []
         for i in range(len(points)):
@@ -65,6 +91,11 @@ def _edges(points):
 
 
 def detect_shape(points):
+    """
+    Given list of points representing corners of figure assumes its shape
+    :param points: ndarray of points with size [Nx2]
+    :return: shape id defined in class Shape from enums.py
+    """
     points = _rdp_reduction(_align_points(points))
     epsilon = points[0][0]
     for point in points:

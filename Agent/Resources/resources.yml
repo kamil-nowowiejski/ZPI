@@ -14,9 +14,11 @@ sql:
   connection: Resources/Database/database.db
   create: Resources/SQL/create.sql
   insert:
-    object: INSERT INTO Objects VALUES(?, ?)
-    shape: INSERT INTO Shapes VALUES(?, ?, ?, ?, ?)
+    object: INSERT INTO Objects VALUES(?, ?, ?)
+    shape: INSERT INTO Shapes VALUES(?, ?, ?, ?, ?, ?, ?)
     symbol: INSERT INTO Symbols VALUES(?, ?)
+    combined_object: INSERT INTO CombinedObjects VALUES(?, ?, ?, ?)
+    combined_object_parts: INSERT INTO CombinedObjectsParts VALUES(?, ?)
   select: Resources/SQL/select.sql
 
 logger:
