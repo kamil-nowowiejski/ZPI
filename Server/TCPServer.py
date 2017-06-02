@@ -32,20 +32,20 @@ class TCPServer(Thread):
 
     def _send(self, message):
         self.send_socket.sendall(message)
-        print '%d -> %s' % (self.address[1], message)
+        print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
         chunks = ''
         buffer_size = res('tcp_server\\buffer_size')
         timeouts = 0
+        connection.settimeout(0.1)
         while True:
             try:
                 chunk = connection.recv(buffer_size)
             except socket.timeout:
-                sleep(0.5)
                 timeouts += 1
                 if timeouts == 5:
-                    raise socket.timeout
+                    break
             except socket.error, e:
                 if e.errno == errno.EAGAIN or e.errno == errno.EWOULDBLOCK:
                     break
@@ -57,7 +57,7 @@ class TCPServer(Thread):
                 chunks += chunk
                 timeouts = 0
         if chunks:
-            print '%d <- %s' % (self.address[1], chunks)
+            print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], chunks)
         return chunks
 
 
@@ -79,7 +79,7 @@ class TCPServerManager(TCPServer):
         self.receive_socket.bind(self.address)
         self.receive_socket.settimeout(0.5)
         self.receive_socket.listen(1)
-        print 'manager server started'
+        print 'manager server started on: %s' % self.address[1]
         while not self._stop:
             try:
                 connection, client_address = self.receive_socket.accept()
