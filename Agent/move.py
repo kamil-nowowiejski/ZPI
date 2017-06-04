@@ -10,7 +10,7 @@ class Move:
     def __init__(self):
         self._state = State.DISCONNECTED
         self.server = arduino.ArduinoServer()
-        self._thread = Thread(target=self._go)
+        self._thread = Thread(target=self._drive_to_marker(), args=[[None, 30], [1]])
         self._stop = False
 
     @property
@@ -31,7 +31,7 @@ class Move:
 
     def go(self):
         if self._state is not State.DISCONNECTED:
-            thread = Thread(target=self._go)
+            thread = Thread(target=self._drive_to_marker, args=[[None, 30], [1]])
             thread.start()
             self._state = State.MOVING
 
@@ -61,3 +61,11 @@ class Move:
         self._stop = True
         self.server.stop()
         self.server.close()
+
+    def _drive_to_marker(self, rvec, tvec):
+        self.server.turn(-rvec[1])
+        self.server.go_distance(tvec[0] * 100)
+        if rvec[1] > 0:
+            self.turn(90)
+        else:
+            self.turn(-90)
