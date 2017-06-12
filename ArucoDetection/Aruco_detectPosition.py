@@ -6,7 +6,7 @@ import cv2
 import numpy
 
 
-class MrkerDetector:
+class MarkerDetector:
 
     markerSize = 0.05
     _camera_matrix = None
@@ -34,7 +34,7 @@ class MrkerDetector:
             rvecs, tvecs, objectPoints = aruco.estimatePoseSingleMarkers(corners, self.markerSize, cameraMatrix=self._camera_matrix, distCoeffs=self._dist_coeffs)
             for x in range(0, len(rvecs)):
                 rvecs[x] = self._convert_rot_matrix_to_degrees(rvecs[x])
-            return rvecs, tvecs
+            return rvecs[0], tvecs[0]
         else: return None, None
 
     def _convert_rot_matrix_to_degrees(self, rvec):

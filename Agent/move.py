@@ -64,8 +64,13 @@ class Move:
 
     def _drive_to_marker(self, rvec, tvec):
         self.server.turn(-rvec[1])
-        self.server.go_distance(tvec[0] * 100)
         if rvec[1] > 0:
             self.turn(90)
         else:
             self.turn(-90)
+
+        self.server.go_distance(tvec[0] * 100)
+        if rvec[1] > 0:
+            self.turn(-90)
+        else:
+            self.turn(90)
