@@ -5,6 +5,10 @@ import main_loop
 from resources import res, ares
 import numpy as np
 from cStringIO import StringIO
+from object import Shape
+import enums
+import errno
+import database as db
 
 import random as r
 
@@ -134,7 +138,30 @@ class TCPAgent(TCPServer):
                 self.context.db.insert(obj)
             self.send_detection(objects)
         elif message.split('|')[0] == 'PROCESS':
-            pass
+            message = message.split('|')
+            objects = []
+            offset = 2
+            for i in range(int(message[1])):
+                type = int(message[offset])
+                height = int(message[offset + 1])
+                width = int(message[offset + 2])
+                color = int(message[offset + 3])
+                symbol_count = int(message[offset + 4])
+                offset += 5
+                symbols = []
+                for j in range(symbol_count):
+                    s_type = int(message[offset])
+                    s_height = int(message[offset + 1])
+                    s_width = int(message[offset + 2])
+                    s_color = int(message[offset + 3])
+                    offset += 4
+                    symbols.append(Shape(enums.Shape(s_type), enums.Size(s_height),
+                                         enums.Size(s_width), enums.Color(s_color)))
+                objects.append(Shape(enums.Shape(type), enums.Size(height),
+                                     enums.Size(width), enums.Color(color), symbols))
+            for obj in objects:
+                db.insert(obj)
+                print str(obj)
 
     def send_feed(self, image):
         sio = StringIO()

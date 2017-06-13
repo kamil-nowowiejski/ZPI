@@ -38,7 +38,7 @@ logger:
     end: end_presence
 
 serial:
-  port: /dev/ttyACM0
+  port: /dev/ttyAMA0
   speed: 38400
   arduino:
     run: '{"type": "agent", "cmd": "go"}'
@@ -55,7 +55,7 @@ serial:
     camera_h: '{"type": "agent", "srv": "tH", "val": ?}'
 
 tcp_server:
-  ip: 127.0.0.1
+  ip: 10.42.0.1
   server_port: 20001
   client_port: 20002
   buffer_size: 2048

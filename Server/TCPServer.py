@@ -10,6 +10,7 @@ from PIL import Image, ImageTk
 import errno
 from object import Shape
 import enums
+from ImageProcessing import objects_detection as od
 
 
 class TCPServer(Thread):
@@ -198,7 +199,18 @@ class TCPServerAgent(TCPServer):
                                      enums.Size(width), enums.Color(color), symbols))
             self.context.show_detected(objects)
         elif message.split('|')[0] == 'PROCESS':
-            pass
+            image = np.load(StringIO(message[8:]))['frame']
+            det = od.ObjectDetector()
+            objects = det.detect_objects(image, 50)
+            for obj in objects:
+                if isinstance(obj, Shape):
+                    message = 'PROCESS|%d' % len(objects)
+                    message += '|%d|%d|%d|%d|%d' % (obj.type.value, obj.height.value, obj.width.value,
+                                                    obj.color.value, len(obj.symbols))
+                    for sym in obj.symbols:
+                        message += '|%d|%d|%d|%d' % (
+                        sym.type.value, sym.height.value, sym.width.value, sym.color.value)
+                    self._send(message)
 
     def shutdown(self):
         self._send('SHUTDOWN')

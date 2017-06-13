@@ -10,7 +10,7 @@ class Move:
     def __init__(self):
         self._state = State.DISCONNECTED
         self.server = arduino.ArduinoServer()
-        self._thread = Thread(target=self._drive_to_marker(), args=[[None, 30], [1]])
+        self._thread = Thread(target=self._go)
         self._stop = False
 
     @property
@@ -31,16 +31,19 @@ class Move:
 
     def go(self):
         if self._state is not State.DISCONNECTED:
-            thread = Thread(target=self._drive_to_marker, args=[[None, 30], [1]])
+            thread = Thread(target=self._run)
             thread.start()
             self._state = State.MOVING
+
+    def _run(self):
+        self._drive_to_marker([None, 30], [1])
 
     def _go(self):
         self.server.turn(135)
         while not self._stop:
-            if self.server.queue[-1] == 'stop':
+            if self.server.queue and 'COM41' in self.server.queue[-1]:
                 break
-            elif self.server.queue[-1] == 'stuck':
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
                 self._state = State.STUCK
                 return
             sleep(1)
@@ -48,10 +51,32 @@ class Move:
             self._state = State.IDLE
             return
         self.server.go_distance(1)
-        while not self._stop:
-            if self.server.queue[-1] == 'stop':
+        while not self.server.queue and self._stop:
+            if self.server.queue and 'COM41' in self.server.queue[-1]:
                 break
-            elif self.server.queue[-1] == 'stuck':
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        self._state = State.IDLE
+
+    def seek(self):
+        self.server.turn(135)
+        while not self._stop:
+            if self.server.queue and 'COM41' in self.server.queue[-1]:
+                break
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        if self._stop:
+            self._state = State.IDLE
+            return
+        self.server.go_distance(1)
+        while not self.server.queue and self._stop:
+            if 'COM41' in self.server.queue[-1]:
+                break
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
                 self._state = State.STUCK
                 return
             sleep(1)
@@ -62,15 +87,65 @@ class Move:
         self.server.stop()
         self.server.close()
 
+    def drive_to_marker(self, rvec, tvec):
+        self.server.turn(-rvec[1])
+        while not self._stop:
+            if self.server.queue and 'COM41' in self.server.queue[-1]:
+                break
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        if self._stop:
+            self._state = State.IDLE
+            return
+        if rvec[1] > 0:
+            self.server.turn(90)
+        else:
+            self.server.turn(-90)
+        while not self._stop:
+            if self.server.queue and 'COM41' in self.server.queue[-1]:
+                break
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        if self._stop:
+            self._state = State.IDLE
+            return
+        self.server.go_distance(tvec[0] * 100)
+        while not self._stop:
+            if self.server.queue and 'COM41' in self.server.queue[-1]:
+                break
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        if self._stop:
+            self._state = State.IDLE
+            return
+        if rvec[1] > 0:
+            self.server.turn(-90)
+        else:
+            self.server.turn(90)
+        while not self.server.queue and self._stop:
+            if 'COM41' in self.server.queue[-1]:
+                break
+            elif self.server.queue and self.server.queue[-1] == 'stuck':
+                self._state = State.STUCK
+                return
+            sleep(1)
+        self._state = State.IDLE
+
     def _drive_to_marker(self, rvec, tvec):
         self.server.turn(-rvec[1])
         if rvec[1] > 0:
-            self.turn(90)
+            self.server.turn(90)
         else:
-            self.turn(-90)
+            self.server.turn(-90)
 
         self.server.go_distance(tvec[0] * 100)
         if rvec[1] > 0:
-            self.turn(-90)
+            self.server.turn(-90)
         else:
-            self.turn(90)
+            self.server.turn(90)
