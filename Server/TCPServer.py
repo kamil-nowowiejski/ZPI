@@ -11,7 +11,7 @@ import errno
 from object import Shape, CombinedObject
 import enums
 from ImageProcessing import objects_detection as od
-#from aruco import MarkerDetector
+from aruco import MarkerDetector
 
 
 class TCPServer(Thread):
@@ -33,7 +33,7 @@ class TCPServer(Thread):
         self.receive_socket.close()
 
     def _send(self, message):
-        self.send_socket.sendall(message)
+        self.send_socket.sendall(message + '\n')
         if len(message) > 60:
             message = message[:60] + '...'
         print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
@@ -208,7 +208,7 @@ class TCPServerAgent(TCPServer):
         elif message.split('|')[0] == 'PROCESS':
             image = np.load(StringIO(message[8:]))['frame']
             #adet = MarkerDetector()
-            #rvecs, tvecs = adet.detect(image)
+            #rvec, tvec = adet.detect(image)
             rvec = None
             tvec = None
             if rvec is None or tvec is None:
