@@ -2,7 +2,7 @@ import cv2
 import math
 import numpy as np
 from Agent.resources import ares
-from Agent.enums import Size
+from Server.enums import Size
 
 
 def assume_size_from_contour(distance, contour, image_resolution, h_fov=None, v_fov=None):

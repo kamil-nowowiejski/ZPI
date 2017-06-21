@@ -5,12 +5,10 @@ import main_loop
 from resources import res, ares
 import numpy as np
 from cStringIO import StringIO
-from object import Shape
+from object import Shape, CombinedObject
 import enums
 import errno
 import database as db
-
-import random as r
 
 
 class TCPServer(Thread):
@@ -33,6 +31,8 @@ class TCPServer(Thread):
 
     def _send(self, message):
         self.send_socket.sendall(message)
+        if len(message) > 60:
+            message = message[:60] + '...'
         print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
@@ -58,7 +58,11 @@ class TCPServer(Thread):
                 chunks += chunk
                 timeouts = 0
         if chunks:
-            print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], chunks)
+            if len(chunks) > 60:
+                message = chunks[:60] + '...'
+            else:
+                message = chunks
+            print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], message)
         return chunks
 
 
@@ -71,6 +75,8 @@ class TCPAgent(TCPServer):
         self.connected = False
         self.feed = False
         self.autonomous = True
+        self.aruco = None
+        self.has_aruco = False
 
     def run(self):
         self.receive_socket.bind(self.address)
@@ -78,9 +84,6 @@ class TCPAgent(TCPServer):
         self.receive_socket.listen(1)
         self.address = (ares('agent_info\\ip'), self.receive_socket.getsockname()[1])
         self.send_socket.connect((res('tcp_server\\ip'), res('tcp_server\\server_port')))
-        # temporary workaround
-        # r.seed(None)
-        # self._send('REGISTER|%s:%d|%d' % (self.address[0], self.address[1], r.randint(1000, 9999)))
         self._send('REGISTER|%s:%d|%s' % (self.address[0], self.address[1], ares('agent_info\\name')))
         timeouts = 0
         print 'agent started'
@@ -116,6 +119,7 @@ class TCPAgent(TCPServer):
             self.send_socket.close()
             self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.send_socket.connect(send_address)
+            self.connected = True
             print 'agent connected'
         elif message == 'SHUTDOWN':
             main_loop.Main.stop[0] = True
@@ -131,37 +135,28 @@ class TCPAgent(TCPServer):
         elif message == 'FEED_OFF':
             self.feed = False
             self._send('FEED_OFF')
-        elif message == 'DETECT':
-            _, image = self.context.camera_manager.read()
-            objects = self.context.detector.detect_objects(image)
-            for obj in objects:
-                self.context.db.insert(obj)
-            self.send_detection(objects)
+        elif message.split('|')[0] == 'ARUCO':
+            parts = message.split('|')
+            if parts[1] == 'None':
+                self.aruco = None
+            else:
+                self.aruco = ([parts[1], parts[2]], [parts[3]])
+            self.has_aruco = True
         elif message.split('|')[0] == 'PROCESS':
-            message = message.split('|')
+            parts = message.split('|')
             objects = []
-            offset = 2
-            for i in range(int(message[1])):
-                type = int(message[offset])
-                height = int(message[offset + 1])
-                width = int(message[offset + 2])
-                color = int(message[offset + 3])
-                symbol_count = int(message[offset + 4])
-                offset += 5
-                symbols = []
-                for j in range(symbol_count):
-                    s_type = int(message[offset])
-                    s_height = int(message[offset + 1])
-                    s_width = int(message[offset + 2])
-                    s_color = int(message[offset + 3])
-                    offset += 4
-                    symbols.append(Shape(enums.Shape(s_type), enums.Size(s_height),
-                                         enums.Size(s_width), enums.Color(s_color)))
-                objects.append(Shape(enums.Shape(type), enums.Size(height),
-                                     enums.Size(width), enums.Color(color), symbols))
+            offset = 3
+            for i in range(int(parts[1])):
+                print 'parsing obj'
+                if parts[offset - 1] == '0':
+                    obj, offset = Shape.from_repr(message, offset)
+                else:
+                    obj, offset = CombinedObject.from_repr(message, offset)
+                objects.append(obj)
+                offset += 1
             for obj in objects:
                 db.insert(obj)
-                print str(obj)
+                print 'saved: %s' % str(obj)
 
     def send_feed(self, image):
         sio = StringIO()
@@ -169,15 +164,6 @@ class TCPAgent(TCPServer):
         sio.seek(0)
         data = sio.read()
         self._send('FEED|%s' % data)
-
-    def send_detection(self, objects):
-        message = 'DETECT|%d' % len(objects)
-        for obj in objects:
-            message += '|%d|%d|%d|%d|%d' % (obj.type.value, obj.height.value, obj.width.value,
-                                            obj.color.value, len(obj.symbols))
-            for sym in obj.symbols:
-                message += '|%d|%d|%d|%d' % (sym.type.value, sym.height.value, sym.width.value, sym.color.value)
-        self._send(message)
 
     def process_image(self, image):
         sio = StringIO()

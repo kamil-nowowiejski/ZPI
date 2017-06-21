@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from Agent.enums import Color
+from Server.enums import Color
 from Agent.resources import ares
 from ast import literal_eval
 

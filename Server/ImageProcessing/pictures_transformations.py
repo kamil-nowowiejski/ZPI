@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from Agent.enums import ColorSpace
+from Server.enums import ColorSpace
 from Agent.resources import ares
 
 
@@ -90,6 +90,7 @@ def color_quantization_using_k_means(im, k):
     img = np.float32(img)
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    # ret, label, center = cv2.kmeans(img, k, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
     ret, label, center = cv2.kmeans(img, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
     center = np.uint8(center)

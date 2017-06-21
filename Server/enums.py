@@ -40,6 +40,7 @@ class Shape(Enum):
     POLYGON = 17
     KITE = 18
     INVALID = 19
+    NONE = 20
 
 
 class MoveState(Enum):

@@ -2,7 +2,7 @@ import cv2
 import math
 import numpy as np
 import common_operations as common
-from Agent.enums import Pattern, Color
+from Server.enums import Pattern, Color
 from Agent.resources import ares
 
 

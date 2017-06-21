@@ -45,9 +45,6 @@ class ArduinoServer:
                 self.queue.append(data)
             sleep(1)
 
-    def ping(self):
-        self._serial.write(res('serial\\arduino\\ping'))
-
     def go_left(self, time=0):
         self._serial.write(res('serial\\arduino\\run_left'))
         if time > 0:
@@ -59,7 +56,7 @@ class ArduinoServer:
             Timer(time, self.stop).start()
 
     def go(self, time=0):
-        self._serial.write(res('serial\\arduino\\run'))
+        self.set_speed(1000)
         if time > 0:
             Timer(time, self.stop).start()
 
