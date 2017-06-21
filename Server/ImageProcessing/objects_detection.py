@@ -5,9 +5,9 @@ import pictures_transformations as pt
 import pattern_recognition as pr
 import common_operations as common
 import size_detection as size_det
-from Agent.enums import Color, ColorSpace, Pattern
-from Agent.enums import Shape as enumShape
-from Agent.object import Shape, CombinedObject
+from Server.enums import Color, ColorSpace, Pattern
+from Server.enums import Shape as enumShape
+from Server.object import Shape, CombinedObject
 from Agent.resources import ares
 
 

@@ -1,7 +1,7 @@
 from rdp import rdp
 import numpy as np
 import cv2
-from Agent.enums import Shape
+from Server.enums import Shape
 
 
 eps = 20.0

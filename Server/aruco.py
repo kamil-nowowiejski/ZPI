@@ -8,20 +8,21 @@ import numpy
 
 class MarkerDetector:
 
-    markerSize = 0.05
-    _camera_matrix = None
-    _dist_coeffs = None
-    _aruco_dict = None
-    _parameters = None
+    def __init__(self):
+        self.markerSize = 0.05
+        self._camera_matrix = None
+        self._dist_coeffs = None
+        self._aruco_dict = None
+        self._parameters = None
+        self.set_up()
 
-    def b_setUp(self):
-        calibrationFile = "Resources/calibration_raspberry.yaml"
-
+    def set_up(self):
+        calibration_path = "Resources/calibration_raspberry.yaml"
         try:
-            plik = open(calibrationFile, "r")
-            myYaml = yaml.load(plik)
-            self._camera_matrix = numpy.asanyarray(myYaml.get("camera_matrix"))
-            self._dist_coeffs = numpy.asanyarray(myYaml.get("dist_coeff"))
+            calibration_file = open(calibration_path, "r")
+            yml = yaml.load(calibration_file)
+            self._camera_matrix = numpy.asanyarray(yml.get("camera_matrix"))
+            self._dist_coeffs = numpy.asanyarray(yml.get("dist_coeff"))
             self._aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
             self._parameters = aruco.DetectorParameters_create()
             return True

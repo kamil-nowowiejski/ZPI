@@ -8,9 +8,10 @@ import Tkinter as tk
 import cv2
 from PIL import Image, ImageTk
 import errno
-from object import Shape
+from object import Shape, CombinedObject
 import enums
 from ImageProcessing import objects_detection as od
+#from aruco import MarkerDetector
 
 
 class TCPServer(Thread):
@@ -33,6 +34,8 @@ class TCPServer(Thread):
 
     def _send(self, message):
         self.send_socket.sendall(message)
+        if len(message) > 60:
+            message = message[:60] + '...'
         print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
@@ -58,7 +61,11 @@ class TCPServer(Thread):
                 chunks += chunk
                 timeouts = 0
         if chunks:
-            print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], chunks)
+            if len(chunks) > 60:
+                message = chunks[:60] + '...'
+            else:
+                message = chunks
+            print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], message)
         return chunks
 
 
@@ -200,17 +207,25 @@ class TCPServerAgent(TCPServer):
             self.context.show_detected(objects)
         elif message.split('|')[0] == 'PROCESS':
             image = np.load(StringIO(message[8:]))['frame']
+            #adet = MarkerDetector()
+            #rvecs, tvecs = adet.detect(image)
+            rvec = None
+            tvec = None
+            if rvec is None or tvec is None:
+                self._send('ARUCO|None')
+            else:
+                send = 'ARUCO'
+                for sc in rvec:
+                    send += '|%d' % sc
+                for sc in tvec:
+                    send += '|%d' % sc
+                self._send('ARUCO|')
             det = od.ObjectDetector()
             objects = det.detect_objects(image, 50)
+            message = 'PROCESS|%d' % len(objects)
             for obj in objects:
-                if isinstance(obj, Shape):
-                    message = 'PROCESS|%d' % len(objects)
-                    message += '|%d|%d|%d|%d|%d' % (obj.type.value, obj.height.value, obj.width.value,
-                                                    obj.color.value, len(obj.symbols))
-                    for sym in obj.symbols:
-                        message += '|%d|%d|%d|%d' % (
-                        sym.type.value, sym.height.value, sym.width.value, sym.color.value)
-                    self._send(message)
+                message += '|%s' % repr(obj)
+            self._send(message)
 
     def shutdown(self):
         self._send('SHUTDOWN')
