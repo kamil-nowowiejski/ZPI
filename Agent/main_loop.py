@@ -105,7 +105,7 @@ class Main:
             self.move.turn(-90)
         sleep(4)
         self.move.go_distance(tvec[0] * 100)
-        sleep(5)
+        sleep(10)
         if rvec[1] > 0:
             self.move.turn(-90)
         else:

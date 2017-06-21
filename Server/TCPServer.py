@@ -11,7 +11,7 @@ import errno
 from object import Shape, CombinedObject
 import enums
 from ImageProcessing import objects_detection as od
-from aruco import MarkerDetector
+from aruco_detector import MarkerDetector
 
 
 class TCPServer(Thread):
@@ -207,19 +207,21 @@ class TCPServerAgent(TCPServer):
             self.context.show_detected(objects)
         elif message.split('|')[0] == 'PROCESS':
             image = np.load(StringIO(message[8:]))['frame']
-            #adet = MarkerDetector()
-            #rvec, tvec = adet.detect(image)
-            rvec = None
-            tvec = None
+            cv2.imwrite('Resources/img.jpg', image)
+            image = cv2.imread('Resources/img.jpg')
+            adet = MarkerDetector()
+            rvec, tvec = adet.detect(image)
+            #rvec = None
+            #tvec = None
             if rvec is None or tvec is None:
                 self._send('ARUCO|None')
             else:
                 send = 'ARUCO'
-                for sc in rvec:
-                    send += '|%d' % sc
-                for sc in tvec:
-                    send += '|%d' % sc
-                self._send('ARUCO|')
+                for sc in rvec[0]:
+                    send += '|%f' % sc
+                for sc in tvec[0]:
+                    send += '|%f' % sc
+                self._send(send)
             det = od.ObjectDetector()
             objects = det.detect_objects(image, 50)
             message = 'PROCESS|%d' % len(objects)
