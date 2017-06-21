@@ -149,3 +149,34 @@ class Move:
             self.server.turn(-90)
         else:
             self.server.turn(90)
+
+
+    def _drive_to_marker_rec(self, rvec, tvec):
+        self.server.turn(-rvec[1])
+        if rvec[1] > 0:
+            self.server.turn(90)
+        else:
+            self.server.turn(-90)
+
+        self.server.go_distance(tvec[0] * 100)
+        if rvec[1] > 0:
+            self.server.turn(-90)
+        else:
+            self.server.turn(90)
+        if(abs(rvec[1])>45): self._drive_to_marker_rec(rvec, tvec);
+
+
+    def _drive_to_marker_rec_v2(self, rvec, tvec):
+        self.server.turn(-rvec[1])
+        if rvec[1] > 0:
+            self.server.turn(90)
+        else:
+            self.server.turn(-90)
+
+        self.server.go_distance(tvec[0] * 100)
+        if rvec[1] > 0:
+            self.server.turn(-90)
+        else:
+            self.server.turn(90)
+        if(tvec[2]>1): self.server.go_distance(tvec[2]/2);
+        if(abs(rvec[1])>45): self._drive_to_marker_rec(rvec, tvec);

@@ -2,6 +2,10 @@ import numpy as np
 import cv2
 import yaml
 
+'''
+skrypt tworzacy plik kalibracyjny kamery. przy wykonywaniu nalezy pokazac kamerze chessboard.png i poczekac az wykryje 10 pol
+'''
+
 # termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)

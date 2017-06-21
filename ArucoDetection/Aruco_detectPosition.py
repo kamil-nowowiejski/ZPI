@@ -7,6 +7,9 @@ import numpy
 
 
 class MarkerDetector:
+    '''
+    klasa do wykrywania kodow aruco na zdjeciach, przed uzyciem nalezy ustawic b_setUp()
+    '''
 
     markerSize = 0.05
     _camera_matrix = None
@@ -15,6 +18,12 @@ class MarkerDetector:
     _parameters = None
 
     def b_setUp(self):
+
+        '''
+        pobranie danych z wymaganych plikow
+        :return: 
+        true jezeli pliki istnieja i maja wymagane dane, w przeciwnym wypadku false
+        '''
         calibrationFile = "Resources/calibration_raspberry.yaml"
 
         try:
@@ -29,6 +38,12 @@ class MarkerDetector:
             return False
 
     def detect(self, image):
+        '''
+        wykrycie znacznikow aruco, wyznaczenie ich katow i odleglosci na podanym obrazie
+        :param image: obraz ze znacznikami
+        :return: rvecs[] tablica, pierwszy wymiar oznacza znaczniki, pozostale 3 to poszczegolne katy pod jakimi znajduje sie dany znacznik
+                tvecs[] tablica, pierwszy wymiar oznacza znaczniki, pozostale 3 to odleglosci znacznika w poszczegolnych osiach wzgledem kamery
+        '''
         corners, ids, rejectedImgPoints = aruco.detectMarkers(image, self._aruco_dict, parameters=self._parameters)
         if corners:
             rvecs, tvecs, objectPoints = aruco.estimatePoseSingleMarkers(corners, self.markerSize, cameraMatrix=self._camera_matrix, distCoeffs=self._dist_coeffs)
@@ -38,6 +53,11 @@ class MarkerDetector:
         else: return None, None
 
     def _convert_rot_matrix_to_degrees(self, rvec):
+        '''
+        przeksztalcenie katow podanych w przeksztalceniu rodrigueza na normalne katy
+        :param rvec: tablica katow zwracana przez aruco
+        :return: tablica normalnych katow
+        '''
 
         rot_matrix = numpy.empty([3, 3])
         cv2.Rodrigues(rvec, rot_matrix, None)
