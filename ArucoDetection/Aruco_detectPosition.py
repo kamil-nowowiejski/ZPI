@@ -24,7 +24,7 @@ class MarkerDetector:
         :return: 
         true jezeli pliki istnieja i maja wymagane dane, w przeciwnym wypadku false
         '''
-        calibrationFile = "Resources/calibration_raspberry.yaml"
+        calibrationFile = "calibration_raspberry.yaml"
 
         try:
             plik = open(calibrationFile, "r")
@@ -34,7 +34,8 @@ class MarkerDetector:
             self._aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
             self._parameters = aruco.DetectorParameters_create()
             return True
-        except:
+        except Exception as e:
+            print e
             return False
 
     def detect(self, image):

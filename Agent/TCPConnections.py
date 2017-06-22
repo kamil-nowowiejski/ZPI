@@ -19,6 +19,7 @@ class TCPServer(Thread):
         self.address = address
         self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._overflow = None
 
     def stop(self):
         self._stop = True
@@ -30,13 +31,18 @@ class TCPServer(Thread):
         self.receive_socket.close()
 
     def _send(self, message):
+        message = '%d|%s' % (len(message), message)
         self.send_socket.sendall(message)
         if len(message) > 60:
-            message = message[:60] + '...'
+            message = message[:20] + '...' + message[-20:]
         print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
         chunks = ''
+        command = ''
+        if self._overflow is not None:
+            chunks = self._overflow
+            self._overflow = None
         buffer_size = res('tcp_server\\buffer_size')
         timeouts = 0
         connection.settimeout(0.1)
@@ -58,12 +64,16 @@ class TCPServer(Thread):
                 chunks += chunk
                 timeouts = 0
         if chunks:
+            length = int(chunks.split('|')[0])
+            command = chunks[len(str(length)) + 1:len(str(length)) + 1 + length]
+            if len(chunks) > len(str(length)) + 1+ length:
+                self._overflow = chunks[len(str(length)) + 1 + length:]
             if len(chunks) > 60:
-                message = chunks[:60] + '...'
+                message = chunks[:20] + '...' + chunks[-20:]
             else:
                 message = chunks
             print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], message)
-        return chunks
+        return command
 
 
 class TCPAgent(TCPServer):
@@ -77,6 +87,7 @@ class TCPAgent(TCPServer):
         self.autonomous = True
         self.aruco = None
         self.has_aruco = False
+        self.received_aruco_answer = False
 
     def run(self):
         self.receive_socket.bind(self.address)
@@ -140,8 +151,10 @@ class TCPAgent(TCPServer):
             if parts[1] == 'None':
                 self.aruco = None
             else:
-                self.aruco = ([parts[1], parts[2]], [parts[3]])
+                self.aruco = ([float(parts[1]), float(parts[2]), float(parts[3])],
+                              [float(parts[4]), float(parts[5]), float(parts[6])])
             self.has_aruco = True
+            self.received_aruco_answer = True
         elif message.split('|')[0] == 'PROCESS':
             parts = message.split('|')
             objects = []

@@ -22,6 +22,7 @@ class TCPServer(Thread):
         self.address = address
         self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._overflow = None
 
     def stop(self):
         self._stop = True
@@ -33,13 +34,18 @@ class TCPServer(Thread):
         self.receive_socket.close()
 
     def _send(self, message):
-        self.send_socket.sendall(message + '\n')
+        message = '%d|%s' % (len(message), message)
+        self.send_socket.sendall(message)
         if len(message) > 60:
-            message = message[:60] + '...'
+            message = message[:20] + '...' + message[-20:]
         print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
         chunks = ''
+        command = ''
+        if self._overflow is not None:
+            chunks = self._overflow
+            self._overflow = None
         buffer_size = res('tcp_server\\buffer_size')
         timeouts = 0
         connection.settimeout(0.1)
@@ -61,12 +67,16 @@ class TCPServer(Thread):
                 chunks += chunk
                 timeouts = 0
         if chunks:
+            length = int(chunks.split('|')[0])
+            command = chunks[len(str(length)) + 1:len(str(length)) + 1 + length]
+            if len(chunks) > len(str(length)) + 1+ length:
+                self._overflow = chunks[len(str(length)) + 1 + length:]
             if len(chunks) > 60:
-                message = chunks[:60] + '...'
+                message = chunks[:20] + '...' + chunks[-20:]
             else:
                 message = chunks
             print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], message)
-        return chunks
+        return command
 
 
 class TCPServerManager(TCPServer):
@@ -207,8 +217,13 @@ class TCPServerAgent(TCPServer):
             self.context.show_detected(objects)
         elif message.split('|')[0] == 'PROCESS':
             image = np.load(StringIO(message[8:]))['frame']
-            cv2.imwrite('Resources/img.jpg', image)
-            image = cv2.imread('Resources/img.jpg')
+            b, g, r = cv2.split(image)
+            tk_image = cv2.merge((r, g, b))
+            tk_image = Image.fromarray(tk_image)
+            tk_image = ImageTk.PhotoImage(image=tk_image)
+            #self.context.video_feed.create_image(480, 320, image=tk_image)
+            self.context.video_feed.create_image(0,0, image=tk_image)
+            self.context.video_feed.frame = tk_image
             adet = MarkerDetector()
             rvec, tvec = adet.detect(image)
             #rvec = None
