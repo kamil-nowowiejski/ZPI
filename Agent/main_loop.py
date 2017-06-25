@@ -112,13 +112,13 @@ class Main:
 
     def drive_to_marker(self, rvec, tvec):
         print 'turn rvec'
-        self.move.turn(-rvec[1])
+        #self.move.turn(-rvec[1])
         sleep(5)
         print 'turn 1st 90'
         if rvec[1] > 0:
-            self.move.turn(90)
+            self.move.turn(90 - rvec[1])
         else:
-            self.move.turn(-90)
+            self.move.turn(-90 - rvec[1])
         sleep(5)
         print 'go dist'
         #self.move.go_distance(tvec[0] * 100)
