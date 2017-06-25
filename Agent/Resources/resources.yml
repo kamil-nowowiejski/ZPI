@@ -11,8 +11,8 @@
 #             - next item
 
 sql:
-  connection: Resources/Database/database.db
-  create: Resources/SQL/create.sql
+  connection: Agent/Resources/Database/database.db
+  create: Agent/Resources/SQL/create.sql
   insert:
     object: INSERT INTO Objects VALUES(?, ?, ?)
     shape: INSERT INTO Shapes VALUES(?, ?, ?, ?, ?, ?, ?)
@@ -55,7 +55,7 @@ serial:
     camera_h: '{"type": "agent", "srv": "tH", "val": ?}'
 
 tcp_server:
-  ip: 192.168.137.80
+  ip: 192.168.137.84
   server_port: 20001
   client_port: 20002
   buffer_size: 2048

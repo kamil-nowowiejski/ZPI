@@ -14,7 +14,7 @@ class Main:
     def __init__(self):
         self.server = TCPAgent(self)
         self.move = ArduinoServer()
-        self.camera_manager = cv2.VideoCapture(0)
+        self.camera_manager = None
 
     def _setup(self):
         # sensors = []
@@ -32,16 +32,14 @@ class Main:
             self.stop[0] = True
 
     def _clean(self):
-        self.camera_manager.release()
         self.move.close()
         self.server.stop()
         print 'server stopped'
 
     def _loop(self):
         sleep(2)
-        event = None
-        cont = False
         while not self.stop[0]:
+            cont = False
             self.observe()
             if self.stop[0]:
                 break
@@ -62,7 +60,7 @@ class Main:
                     cont = True
                     break
                 elif event.split('|')[0] == 'GOF':
-                    dist = event.split('|')[1]
+                    dist = float(event.split('|')[1])
                     break
                 elif event.split('|')[0] == 'OINR':
                     saved = self.obstacle()
@@ -84,7 +82,24 @@ class Main:
                 self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
                 break
             self.move.turn(67)
-            sleep(3)
+            self.move.queue = []
+            while True:
+                event = self.move.event
+                if event is None:
+                    sleep(1)
+                    continue
+                elif event == 'COMOK':
+                    continue
+                elif event.split('|')[0] == 'COMERR':
+                    cont = True
+                    break
+                elif event.split('|')[0] == 'TURN':
+                    turn = float(event.split('|')[1])
+                    break
+            if self.stop[0]:
+                break
+            if cont:
+                continue
 
             self.observe()
             if self.stop[0]:
@@ -94,7 +109,24 @@ class Main:
                 self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
                 break
             self.move.turn(-134)
-            sleep(4)
+            self.move.queue = []
+            while True:
+                event = self.move.event
+                if event is None:
+                    sleep(1)
+                    continue
+                elif event == 'COMOK':
+                    continue
+                elif event.split('|')[0] == 'COMERR':
+                    cont = True
+                    break
+                elif event.split('|')[0] == 'TURN':
+                    turn = float(event.split('|')[1])
+                    break
+            if self.stop[0]:
+                break
+            if cont:
+                continue
 
             self.observe()
             if self.stop[0]:
@@ -104,10 +136,45 @@ class Main:
                 self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
                 break
             self.move.turn(67)
-            sleep(3)
+            self.move.queue = []
+            while True:
+                event = self.move.event
+                if event is None:
+                    sleep(1)
+                    continue
+                elif event == 'COMOK':
+                    continue
+                elif event.split('|')[0] == 'COMERR':
+                    cont = True
+                    break
+                elif event.split('|')[0] == 'TURN':
+                    turn = float(event.split('|')[1])
+                    break
             if self.stop[0]:
                 break
+            if cont:
+                continue
+
             self.move.turn(random.randint(-180, 180))
+            self.move.queue = []
+            while True:
+                event = self.move.event
+                if event is None:
+                    sleep(1)
+                    continue
+                elif event == 'COMOK':
+                    continue
+                elif event.split('|')[0] == 'COMERR':
+                    cont = True
+                    break
+                elif event.split('|')[0] == 'TURN':
+                    turn = float(event.split('|')[1])
+                    break
+            if self.stop[0]:
+                break
+            if cont:
+                continue
+
         sleep(10)
 
     def observe(self):
@@ -142,33 +209,104 @@ class Main:
                 continue
             elif event.split('|')[0] == 'DIST':
                 dist = float(event.split('|')[1])
-                if dist > 33:
+                if dist > 50:
                     return True
                 else:
                     return False
 
     def drive_to_marker(self, rvec, tvec):
-        print 'turn rvec'
-        #self.move.turn(-rvec[1])
-        sleep(5)
-        print 'turn 1st 90'
+        print rvec
+        print tvec
+        self.move.turn(-rvec[1])
+        self.move.queue = []
+        err = False
+        while True:
+            event = self.move.event
+            if event is None:
+                sleep(1)
+                continue
+            elif event == 'COMOK':
+                continue
+            elif event.split('|')[0] == 'COMERR':
+                err = True
+                break
+            elif event.split('|')[0] == 'TURN':
+                turn = float(event.split('|')[1])
+                break
+        if err:
+            self.server.has_aruco = False
+            return
+
         if rvec[1] > 0:
-            self.move.turn(90 - rvec[1])
+            self.move.turn(90)
         else:
-            self.move.turn(-90 - rvec[1])
-        sleep(5)
-        print 'go dist'
-        #self.move.go_distance(tvec[0] * 100)
-        self.move.go(3)
-        sleep(7)
-        print 'turn 2nd 90'
+            self.move.turn(-90)
+        while True:
+            event = self.move.event
+            if event is None:
+                sleep(1)
+                continue
+            elif event == 'COMOK':
+                continue
+            elif event.split('|')[0] == 'COMERR':
+                err = True
+                break
+            elif event.split('|')[0] == 'TURN':
+                turn = float(event.split('|')[1])
+                break
+        if err:
+            self.server.has_aruco = False
+            return
+
+        self.move.go_distance(tvec[0] * 100)
+        while True:
+            event = self.move.event
+            if event is None:
+                sleep(1)
+                continue
+            elif event == 'COMOK':
+                continue
+            elif event.split('|')[0] == 'COMERR':
+                err = True
+                break
+            elif event.split('|')[0] == 'GOF':
+                dist = float(event.split('|')[1])
+                break
+            elif event.split('|')[0] == 'OINR':
+                err = True
+                dist = float(event.split('|')[1])
+                save = self.obstacle()
+                if not save:
+                    self.stop[0] = True
+                break
+        if err:
+            self.server.has_aruco = False
+            return
+
         if rvec[1] > 0:
             self.move.turn(-90)
         else:
             self.move.turn(90)
-        sleep(5)
-        #self.observe()
+        while True:
+            event = self.move.event
+            if event is None:
+                sleep(1)
+                continue
+            elif event == 'COMOK':
+                continue
+            elif event.split('|')[0] == 'COMERR':
+                err = True
+                break
+            elif event.split('|')[0] == 'TURN':
+                turn = float(event.split('|')[1])
+                break
+        if err:
+            self.server.has_aruco = False
+            return
+
+        self.observe()
         self.server.has_aruco = False
+        return
 
     def run(self):
         self._setup()
