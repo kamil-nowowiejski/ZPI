@@ -14,7 +14,7 @@ class Main:
     def __init__(self):
         self.server = TCPAgent(self)
         self.move = ArduinoServer()
-        #self.camera_manager = cv2.VideoCapture(0)
+        self.camera_manager = cv2.VideoCapture(0)
 
     def _setup(self):
         # sensors = []
@@ -32,66 +32,82 @@ class Main:
             self.stop[0] = True
 
     def _clean(self):
-        #self.camera_manager.release()
+        self.camera_manager.release()
         self.move.close()
         self.server.stop()
         print 'server stopped'
 
     def _loop(self):
         sleep(2)
-        self.drive_to_marker([None, 45], [20])
+        event = None
+        cont = False
         while not self.stop[0]:
             self.observe()
-            if self.server.has_aruco:
-                if self.server.aruco is not None:
-                    self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                self.server.has_aruco = False
-            sleep(1)
-        '''while not self.stop[0]:
-            for _1 in range(2):
-                sleep(2)
-                for _2 in range(2):
-                    self.observe()
-                    if self.stop[0]:
-                        break
-                    self.server.has_aruco = False
-                    if self.server.aruco is not None:
-                        self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                        break
-                    self.move.go(3)
-
-                    self.observe()
-                    if self.stop[0]:
-                        break
-                    self.server.has_aruco = False
-                    if self.server.aruco is not None:
-                        self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                        break
-                    self.move.turn(67)
-                    sleep(3)
-
-                    self.observe()
-                    if self.stop[0]:
-                        break
-                    self.server.has_aruco = False
-                    if self.server.aruco is not None:
-                        self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                        break
-                    self.move.turn(-134)
-                    sleep(4)
-
-                    self.observe()
-                    if self.stop[0]:
-                        break
-                    self.server.has_aruco = False
-                    if self.server.aruco is not None:
-                        self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                        break
-                    self.move.turn(67)
-                    sleep(3)
-                if self.stop[0]:
+            if self.stop[0]:
+                break
+            self.server.has_aruco = False
+            if self.server.aruco is not None:
+                self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
+                continue
+            self.move.go_distance(33)
+            self.move.queue = []
+            while True:
+                event = self.move.event
+                if event is None:
+                    sleep(1)
+                    continue
+                elif event == 'COMOK':
+                    continue
+                elif event.split('|')[0] == 'COMERR':
+                    cont = True
                     break
-                self.move.turn(random.randint(-180, 180))'''
+                elif event.split('|')[0] == 'GOF':
+                    dist = event.split('|')[1]
+                    break
+                elif event.split('|')[0] == 'OINR':
+                    saved = self.obstacle()
+                    if saved:
+                        cont = True
+                    else:
+                        self.stop[0] = True
+                    break
+            if self.stop[0]:
+                break
+            if cont:
+                continue
+
+            self.observe()
+            if self.stop[0]:
+                break
+            self.server.has_aruco = False
+            if self.server.aruco is not None:
+                self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
+                break
+            self.move.turn(67)
+            sleep(3)
+
+            self.observe()
+            if self.stop[0]:
+                break
+            self.server.has_aruco = False
+            if self.server.aruco is not None:
+                self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
+                break
+            self.move.turn(-134)
+            sleep(4)
+
+            self.observe()
+            if self.stop[0]:
+                break
+            self.server.has_aruco = False
+            if self.server.aruco is not None:
+                self.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
+                break
+            self.move.turn(67)
+            sleep(3)
+            if self.stop[0]:
+                break
+            self.move.turn(random.randint(-180, 180))
         sleep(10)
 
     def observe(self):
@@ -109,6 +125,27 @@ class Main:
         while not self.server.received_aruco_answer and not self.stop[0]:
             sleep(1)
         self.server.received_aruco_answer = False
+
+    def obstacle(self):
+        self.move.turn(135)
+        while True:
+            event = self.move.event
+            if event is None:
+                sleep(1)
+                continue
+            elif event == 'COMOK':
+                continue
+            elif event.split('|')[0] == 'COMERR':
+                return False
+            elif event.split('|')[0] == 'TURN':
+                self.move.distance()
+                continue
+            elif event.split('|')[0] == 'DIST':
+                dist = float(event.split('|')[1])
+                if dist > 33:
+                    return True
+                else:
+                    return False
 
     def drive_to_marker(self, rvec, tvec):
         print 'turn rvec'

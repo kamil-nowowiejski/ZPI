@@ -221,8 +221,7 @@ class TCPServerAgent(TCPServer):
             tk_image = cv2.merge((r, g, b))
             tk_image = Image.fromarray(tk_image)
             tk_image = ImageTk.PhotoImage(image=tk_image)
-            #self.context.video_feed.create_image(480, 320, image=tk_image)
-            self.context.video_feed.create_image(0,0, image=tk_image)
+            self.context.video_feed.create_image(0, 0, image=tk_image)
             self.context.video_feed.frame = tk_image
             adet = MarkerDetector()
             rvec, tvec = adet.detect(image)

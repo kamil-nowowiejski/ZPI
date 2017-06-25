@@ -22,6 +22,13 @@ class ArduinoServer:
     def open(self):
         return self._serial.isOpen()
 
+    @property
+    def event(self):
+        if len(self.queue) == 0:
+            return None
+        else:
+            return self.queue.pop(0)
+
     def end(self):
         self._stop = True
 
@@ -43,20 +50,11 @@ class ArduinoServer:
             if self._serial.inWaiting() > 0:
                 data = self._serial.readline()
                 self.queue.append(data)
+                print 'arduino: %s' % data
             sleep(1)
 
-    def go_left(self, time=0):
-        self._serial.write(res('serial\\arduino\\run_left'))
-        if time > 0:
-            Timer(time, self.stop).start()
-
-    def go_right(self, time=0):
-        self._serial.write(res('serial\\arduino\\run_right'))
-        if time > 0:
-            Timer(time, self.stop).start()
-
     def go(self, time=0):
-        self.set_speed(1000)
+        self._serial.write(res('serial\\arduino\\run'))
         if time > 0:
             Timer(time, self.stop).start()
 
@@ -69,5 +67,8 @@ class ArduinoServer:
     def go_distance(self, distance):
         self._serial.write(res('serial\\arduino\\run_distance').replace('?', str(distance)))
 
-    def set_speed(self, speed):
-        self._serial.write(res('serial\\arduino\\set_speed').replace('?', str(speed)))
+    # def set_speed(self, speed):
+    #     self._serial.write(res('serial\\arduino\\set_speed').replace('?', str(speed)))
+
+    def distance(self):
+        self._serial.write(res('serial\\arduino\\distance'))
