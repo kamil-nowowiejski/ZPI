@@ -6,7 +6,6 @@ from resources import res, ares
 import numpy as np
 from cStringIO import StringIO
 from object import Shape, CombinedObject
-import enums
 import errno
 import database as db
 
@@ -35,7 +34,8 @@ class TCPServer(Thread):
         self.send_socket.sendall(message)
         if len(message) > 60:
             message = message[:20] + '...' + message[-20:]
-        print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
+        if main_loop.Main.debug_tcp:
+            print '[TCP] %s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
         chunks = ''
@@ -72,7 +72,8 @@ class TCPServer(Thread):
                 message = chunks[:20] + '...' + chunks[-20:]
             else:
                 message = chunks
-            print '%s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], message)
+            if main_loop.Main.debug_tcp:
+                print '[TCP] %s:%d <- %s' % (self.receive_socket.getsockname()[0], self.receive_socket.getsockname()[1], message)
         return command
 
 
@@ -97,7 +98,8 @@ class TCPAgent(TCPServer):
         self.send_socket.connect((res('tcp_server\\ip'), res('tcp_server\\server_port')))
         self._send('REGISTER|%s:%d|%s' % (self.address[0], self.address[1], ares('agent_info\\name')))
         timeouts = 0
-        print 'agent started'
+        if main_loop.Main.debug_tcp:
+            print '[TCP] Server started'
         while not self._stop:
             try:
                 connection, client_address = self.receive_socket.accept()
@@ -107,20 +109,24 @@ class TCPAgent(TCPServer):
                 if timeouts == 5:
                     self.stop()
             except socket.error:
-                print 'agent error'
+                if main_loop.Main.debug_tcp:
+                    print '[TCP] Socket error'
                 self.stop()
             else:
                 while not self._stop:
                     try:
                         message = self._receive(connection)
                     except socket.timeout:
-                        print 'agent timeout'
+                        if main_loop.Main.debug_tcp:
+                            print '[TCP] Socket timeout'
                     except socket.error:
-                        print 'agent error'
+                        if main_loop.Main.debug_tcp:
+                            print '[TCP] Socket error'
                         self.stop()
                     else:
                         self.process_request(message)
-        print 'agent stopped'
+        if main_loop.Main.debug_tcp:
+            print '[TCP] Server stopped'
         self.send_socket.close()
         self.receive_socket.close()
 
@@ -131,7 +137,8 @@ class TCPAgent(TCPServer):
             self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.send_socket.connect(send_address)
             self.connected = True
-            print 'agent connected'
+            if main_loop.Main.debug_tcp:
+                print '[TCP] Server connected'
         elif message == 'SHUTDOWN':
             main_loop.Main.stop[0] = True
         elif message == 'LOGIC_ON':
@@ -160,7 +167,6 @@ class TCPAgent(TCPServer):
             objects = []
             offset = 3
             for i in range(int(parts[1])):
-                print 'parsing obj'
                 if parts[offset - 1] == '0':
                     obj, offset = Shape.from_repr(message, offset)
                 else:
@@ -169,7 +175,8 @@ class TCPAgent(TCPServer):
                 offset += 1
             for obj in objects:
                 db.insert(obj)
-                print 'saved: %s' % str(obj)
+                if main_loop.Main.debug_db:
+                    print '[SQL] %s' % str(obj)
 
     def send_feed(self, image):
         sio = StringIO()

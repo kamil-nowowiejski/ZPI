@@ -22,7 +22,8 @@ def res(path):
 
 def ares(path):
     """Return agent resource to which the path points"""
-    with open('Agent/Resources/agent.yml', 'r') as resources_file:
+    # with open('Agent/Resources/agent.yml', 'r') as resources_file:
+    with open('Resources/agent.yml', 'r') as resources_file:
         resource = yaml.load(resources_file)
         split = path.split('\\')
         for part in split:

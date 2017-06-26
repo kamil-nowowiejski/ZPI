@@ -1,6 +1,7 @@
 """Data model"""
 import enums as enums
 
+
 class Object:
 
     def __init__(self, id, name=''):
@@ -56,10 +57,10 @@ class Shape(Object):
         return are_equal
 
     def __str__(self):
-        result = 'Shape: ' + str(self.color) + ' ' + str(self.type) + ' ' + str(self.width) + ' ' + str(self.height) + ' ' + \
-                 str(self.pattern) + str(self.pattern_color) + '\n'
+        result = 'Shape: ' + self.color.name + ' ' + self.type.name + ' ' + self.width.name + ' ' + self.height.name +\
+                 ' ' + self.pattern.name + ' ' + self.pattern_color.name + ' ' + str(len(self.symbols)) + '\n'
         for symbol in self.symbols:
-            result += '\t' + symbol.to_string()
+            result += '\t' + str(symbol)
         return result
 
     def __repr__(self):
@@ -131,10 +132,10 @@ class CombinedObject(Object):
         self.parts = parts
 
     def __str__(self):
-        result = 'Combined: ' + str(self.type) + ' ' + str(self.width) + ' ' + str(self.height) + ' ' + \
+        result = 'Combined: ' + self.type.name + ' ' + self.width.name + ' ' + self.height.name + ' ' +\
                  str(len(self.parts)) + '\n'
         for part in self.parts:
-            result += '\t' + part.to_stirng()
+            result += '\t' + str(part)
         return result
 
     def __repr__(self):
@@ -157,7 +158,7 @@ class CombinedObject(Object):
         parts = string.split('|')
         obj_type = enums.Shape.NONE
         obj_width = enums.Size.NONE
-        obj_height = enums.Size.None
+        obj_height = enums.Size.NONE
         if parts[offset] != '':
             obj_type = enums.Shape(int(parts[offset]))
         if parts[offset + 1] != '':

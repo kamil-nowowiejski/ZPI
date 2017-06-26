@@ -4,6 +4,7 @@ from threading import Timer
 from threading import Thread
 from time import sleep
 from resources import res
+import main_loop
 
 
 class ArduinoServer:
@@ -50,25 +51,31 @@ class ArduinoServer:
             if self._serial.inWaiting() > 0:
                 data = self._serial.readline()
                 self.queue.append(data)
-                print 'arduino: %s' % data
+                if main_loop.Main.debug_arduino:
+                    print '[INO] >> %s' % data
             sleep(1)
 
+    def _send(self, message):
+        self._serial.write(message)
+        if main_loop.Main.debug_arduino:
+            print '[INO] << %s' % message
+
     def go(self, time=0):
-        self._serial.write(res('serial\\arduino\\run'))
+        self._send(res('serial\\arduino\\run'))
         if time > 0:
             Timer(time, self.stop).start()
 
     def stop(self):
-        self._serial.write(res('serial\\arduino\\stop'))
+        self._send(res('serial\\arduino\\stop'))
 
     def turn(self, angle):
-        self._serial.write(res('serial\\arduino\\turn').replace('?', str(angle)))
+        self._send(res('serial\\arduino\\turn').replace('?', str(angle * 2)))
 
     def go_distance(self, distance):
-        self._serial.write(res('serial\\arduino\\run_distance').replace('?', str(distance)))
+        self._send(res('serial\\arduino\\run_distance').replace('?', str(distance)))
 
     # def set_speed(self, speed):
-    #     self._serial.write(res('serial\\arduino\\set_speed').replace('?', str(speed)))
+    #     self._serial.send(res('serial\\arduino\\set_speed').replace('?', str(speed)))
 
     def distance(self):
-        self._serial.write(res('serial\\arduino\\distance'))
+        self._send(res('serial\\arduino\\distance'))

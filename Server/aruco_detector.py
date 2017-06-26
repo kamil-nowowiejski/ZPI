@@ -32,7 +32,8 @@ class MarkerDetector:
     def detect(self, image):
         corners, ids, rejectedImgPoints = aruco.detectMarkers(image, self._aruco_dict, parameters=self._parameters)
         if corners:
-            rvecs, tvecs, objectPoints = aruco.estimatePoseSingleMarkers(corners, self.markerSize, cameraMatrix=self._camera_matrix, distCoeffs=self._dist_coeffs)
+            # rvecs, tvecs, objectPoints = aruco.estimatePoseSingleMarkers(corners, self.markerSize, cameraMatrix=self._camera_matrix, distCoeffs=self._dist_coeffs)
+            rvecs, tvecs = aruco.estimatePoseSingleMarkers(corners, self.markerSize, cameraMatrix=self._camera_matrix, distCoeffs=self._dist_coeffs)
             for x in range(0, len(rvecs)):
                 rvecs[x] = self._convert_rot_matrix_to_degrees(rvecs[x])
             return rvecs[0], tvecs[0]

@@ -16,7 +16,7 @@ class App(tk.Frame):
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.master.title('Server')
+        self.master.title('Seweryn')
         self.master.protocol('WM_DELETE_WINDOW', self.on_close)
         self.server = TCPServerManager(self)
         self.init_gui()
