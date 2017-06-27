@@ -5,7 +5,6 @@ from move import Move
 from time import sleep
 from TCPConnections import TCPAgent
 from resources import ares
-from arduino import ArduinoServer
 import random
 
 
@@ -43,12 +42,14 @@ class Main:
         sleep(2)
         while not self.stop[0]:
             cont = False
-            self.observe()
+            self.aruco()
             if self.stop[0]:
                 break
             self.server.has_aruco = False
             if self.server.aruco is not None:
-                self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
+                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                    self.observe()
+                    self.move.turn(135)
                 continue
             self.stop[0], cont = self.move.go(33)
             if self.stop[0]:
@@ -56,40 +57,46 @@ class Main:
             if cont:
                 continue
 
-            self.observe()
+            self.aruco()
             if self.stop[0]:
                 break
             self.server.has_aruco = False
             if self.server.aruco is not None:
-                self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                break
-            self.stop[0], cont = self.move.turn(67)
+                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                    self.observe()
+                    self.move.turn(135)
+                continue
+            self.stop[0], cont = self.move.turn(66)
             if self.stop[0]:
                 break
             if cont:
                 continue
 
-            self.observe()
+            self.aruco()
             if self.stop[0]:
                 break
             self.server.has_aruco = False
             if self.server.aruco is not None:
-                self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                break
-            self.stop[0], cont = self.move.turn(-134)
+                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                    self.observe()
+                    self.move.turn(135)
+                continue
+            self.stop[0], cont = self.move.turn(-132)
             if self.stop[0]:
                 break
             if cont:
                 continue
 
-            self.observe()
+            self.aruco()
             if self.stop[0]:
                 break
             self.server.has_aruco = False
             if self.server.aruco is not None:
-                self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1])
-                break
-            self.stop[0], cont = self.move.turn(67)
+                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                    self.observe()
+                    self.move.turn(135)
+                continue
+            self.stop[0], cont = self.move.turn(66)
             if self.stop[0]:
                 break
             if cont:
@@ -106,15 +113,20 @@ class Main:
     def observe(self):
         self.camera_manager = cv2.VideoCapture(0)
         _, image = self.camera_manager.read()
-        self.server.process_image(image)
         self.camera_manager.release()
+        self.server.process_image(image)
+
+    def aruco(self):
+        self.camera_manager = cv2.VideoCapture(0)
+        _, image = self.camera_manager.read()
+        self.camera_manager.release()
+        self.server.find_aruco(image)
         timeouts = 0
-        #while not self.server.has_aruco and timeouts < 10:
+        # while not self.server.has_aruco and timeouts < 10:
         #    timeouts += 1
         #    sleep(1)
-        #if timeouts >= 10:
+        # if timeouts >= 10:
         #    self.stop[0] = True
-
         while not self.server.received_aruco_answer and not self.stop[0]:
             sleep(1)
         self.server.received_aruco_answer = False

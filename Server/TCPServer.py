@@ -215,8 +215,8 @@ class TCPServerAgent(TCPServer):
                 objects.append(Shape(enums.Shape(type), enums.Size(height),
                                      enums.Size(width), enums.Color(color), symbols))
             self.context.show_detected(objects)
-        elif message.split('|')[0] == 'PROCESS':
-            image = np.load(StringIO(message[8:]))['frame']
+        elif message.split('|')[0] == 'ARUCO':
+            image = np.load(StringIO(message[6:]))['frame']
             b, g, r = cv2.split(image)
             tk_image = cv2.merge((r, g, b))
             tk_image = Image.fromarray(tk_image)
@@ -225,8 +225,6 @@ class TCPServerAgent(TCPServer):
             self.context.video_feed.frame = tk_image
             adet = MarkerDetector()
             rvec, tvec = adet.detect(image)
-            #rvec = None
-            #tvec = None
             if rvec is None or tvec is None:
                 self._send('ARUCO|None')
             else:
@@ -236,6 +234,14 @@ class TCPServerAgent(TCPServer):
                 for sc in tvec[0]:
                     send += '|%f' % sc
                 self._send(send)
+        elif message.split('|')[0] == 'PROCESS':
+            image = np.load(StringIO(message[8:]))['frame']
+            b, g, r = cv2.split(image)
+            tk_image = cv2.merge((r, g, b))
+            tk_image = Image.fromarray(tk_image)
+            tk_image = ImageTk.PhotoImage(image=tk_image)
+            self.context.video_feed.create_image(0, 0, image=tk_image)
+            self.context.video_feed.frame = tk_image
             det = od.ObjectDetector()
             objects = det.detect_objects(image, 50)
             message = 'PROCESS|%d' % len(objects)

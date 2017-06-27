@@ -185,6 +185,13 @@ class TCPAgent(TCPServer):
         data = sio.read()
         self._send('FEED|%s' % data)
 
+    def find_aruco(self, image):
+        sio = StringIO()
+        np.savez_compressed(sio, frame=image)
+        sio.seek(0)
+        data = sio.read()
+        self._send('ARUCO|%s' % data)
+
     def process_image(self, image):
         sio = StringIO()
         np.savez_compressed(sio, frame=image)

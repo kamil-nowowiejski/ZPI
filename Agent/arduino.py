@@ -69,7 +69,7 @@ class ArduinoServer:
         self._send(res('serial\\arduino\\stop'))
 
     def turn(self, angle):
-        self._send(res('serial\\arduino\\turn').replace('?', str(angle * 2)))
+        self._send(res('serial\\arduino\\turn').replace('?', str(angle * 1.6)))
 
     def go_distance(self, distance):
         self._send(res('serial\\arduino\\run_distance').replace('?', str(distance)))

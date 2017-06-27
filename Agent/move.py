@@ -1,8 +1,5 @@
-from threading import Thread
 from time import sleep
-
 import arduino
-from enums import MoveState as State
 
 
 class Move:
@@ -126,7 +123,7 @@ class Move:
         if err:
             return
 
-        self.server.go_distance(tvec[0] * 100)
+        self.server.go_distance(abs(tvec[0] * 100))
         while True:
             event = self.server.event
             if event is None:
@@ -169,4 +166,4 @@ class Move:
                 break
         if err:
             return
-        return
+        return True
