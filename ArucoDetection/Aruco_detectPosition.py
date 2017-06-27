@@ -53,6 +53,23 @@ class MarkerDetector:
             return rvecs[0], tvecs[0]
         else: return None, None
 
+    def detectMonochromatic(self, image):
+        '''
+        wykrycie znacznikow aruco, wyznaczenie ich katow i odleglosci na podanym obrazie przy użyciu monochromatycznosci obrazu wejsciowego - daje zdecydwoanie lepsze wyniki przy dorym oswietleniu
+        :param image: obraz ze znacznikami
+        :return: rvecs[] tablica, pierwszy wymiar oznacza znaczniki, pozostale 3 to poszczegolne katy pod jakimi znajduje sie dany znacznik
+                tvecs[] tablica, pierwszy wymiar oznacza znaczniki, pozostale 3 to odleglosci znacznika w poszczegolnych osiach wzgledem kamery
+        '''
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        _, image = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY)
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(image, self._aruco_dict, parameters=self._parameters)
+        if corners:
+            rvecs, tvecs, objectPoints = aruco.estimatePoseSingleMarkers(corners, self.markerSize, cameraMatrix=self._camera_matrix, distCoeffs=self._dist_coeffs)
+            for x in range(0, len(rvecs)):
+                rvecs[x] = self._convert_rot_matrix_to_degrees(rvecs[x])
+            return rvecs[0], tvecs[0]
+        else: return None, None
+
     def _convert_rot_matrix_to_degrees(self, rvec):
         '''
         przeksztalcenie katow podanych w przeksztalceniu rodrigueza na normalne katy
