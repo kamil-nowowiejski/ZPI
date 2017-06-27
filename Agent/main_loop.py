@@ -134,4 +134,6 @@ class Main:
     def run(self):
         self._setup()
         self._loop()
+        # self.observe()
+        # sleep(10)
         self._clean()

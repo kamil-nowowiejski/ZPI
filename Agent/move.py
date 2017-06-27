@@ -166,4 +166,30 @@ class Move:
                 break
         if err:
             return
+
+        if abs(tvec[2]) > 0.5:
+            self.server.go_distance(50 - abs(tvec[2]))
+            while True:
+                event = self.server.event
+                if event is None:
+                    sleep(1)
+                    continue
+                elif event == 'COMOK':
+                    continue
+                elif event.split('|')[0] == 'COMERR':
+                    err = True
+                    break
+                elif event.split('|')[0] == 'GOF':
+                    dist = float(event.split('|')[1])
+                    break
+                elif event.split('|')[0] == 'OINR':
+                    err = True
+                    dist = float(event.split('|')[1])
+                    save = self.obstacle()
+                    if not save:
+                        stop = True
+                    break
+            if err:
+                return
+
         return True

@@ -44,6 +44,9 @@ class ObjectDetector:
             frame_copy = self._prepare_image_for_detection(frame_copy)
         result = []
 
+        #cv2.imshow('dsv', frame_copy)
+        #cv2.waitKey(0)
+
         # find contours of all combinded objects; here basic objects are considered to be combined objects
         external_contours = self._find_external_contours(frame_copy)
         for single_contour in external_contours:
