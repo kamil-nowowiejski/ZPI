@@ -1,11 +1,12 @@
 # coding=UTF-8
+"""Server app with Tkinter GUI"""
 import Tkinter as tk
 from TCPServer import TCPServerManager
 from threading import Timer
-from tkMessageBox import showinfo
 
 
 def start():
+    """Start server"""
     root = tk.Tk()
     root.geometry('800x600+250+50')
     app = App(root)
@@ -13,6 +14,7 @@ def start():
 
 
 class App(tk.Frame):
+    """Server app"""
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -23,6 +25,7 @@ class App(tk.Frame):
         self.server.start()
 
     def init_gui(self):
+        """Build GUI"""
         self.video_feed = tk.Canvas(width=480, height=320)
         self.video_feed.config(background='white')
         self.video_feed.grid(column=0, columnspan=4, row=0, rowspan=4, padx=10, pady=10, sticky='nw')
@@ -43,23 +46,11 @@ class App(tk.Frame):
         self.info_logic = tk.Label(text='-')
         self.info_logic.grid(column=6, row=1, padx=10, pady=10, sticky='nw')
 
-        self.label_feed = tk.Label(text='Feed')
-        self.label_feed.grid(column=5, row=2, padx=10, pady=10, sticky='nw')
-
-        self.info_feed = tk.Label(text='-')
-        self.info_feed.grid(column=6, row=2, padx=10, pady=10, sticky='nw')
-
         self.button_shutdown = tk.Button(text='Shutdown', command=self.b_shutdown, state=tk.DISABLED, width=20)
         self.button_shutdown.grid(column=0, row=4, padx=10, pady=10, sticky='nw')
 
         self.button_logic = tk.Button(text='Logic', command=self.b_switch_logic, state=tk.DISABLED, width=20)
         self.button_logic.grid(column=0, row=5, padx=10, pady=10, sticky='nw')
-
-        self.button_feed = tk.Button(text='Video', command=self.b_switch_feed, state=tk.DISABLED, width=20)
-        self.button_feed.grid(column=0, row=6, padx=10, pady=10, sticky='nw')
-
-        self.button_detect = tk.Button(text='Detect', command=self.b_detect, state=tk.DISABLED, width=20)
-        self.button_detect.grid(column=0, row=7, padx=10, pady=10, sticky='nw')
 
         self.button_up = tk.Button(text='▲', command=self.b_up, state=tk.DISABLED, width=5, height=2)
         self.button_up.grid(column=2, row=5, padx=5, pady=10, sticky='s')
@@ -74,6 +65,7 @@ class App(tk.Frame):
         self.button_stop.grid(column=2, row=6, padx=5, pady=10, sticky='n')
 
     def update_info(self):
+        """update data displayed on screen"""
         for agent in self.server.agents:
             if agent.agent_name == self.agents_list.get(tk.ACTIVE):
                 self.info_name.config(text=agent.agent_name)
@@ -81,10 +73,6 @@ class App(tk.Frame):
                     self.info_logic.config(text='ON')
                 else:
                     self.info_logic.config(text='OFF')
-                if agent.feed:
-                    self.info_feed.config(text='ON')
-                else:
-                    self.info_feed.config(text='OFF')
                 if not agent.autonomous and agent.feed:
                     self.button_detect.config(state=tk.NORMAL)
                     self.button_up.config(state=tk.NORMAL)
@@ -98,20 +86,13 @@ class App(tk.Frame):
                     self.button_right.config(state=tk.DISABLED)
                     self.button_stop.config(state=tk.DISABLED)
 
-    def show_detected(self, objects):
-        message = 'Detected objects:'
-        for obj in objects:
-            message += '\n%s, %s, %s, %s' % (obj.type, obj.height, obj.width, obj.color)
-            for sym in obj.symbols:
-                message += '\n\t%s, %s, %s, %s' % (sym.type, sym.height, sym.width, sym.color)
-        # showinfo('Detected objects', 'msg')
-        print message
-
     def on_close(self):
+        """WM_DELETE_WINDOW handler, executed when [X] button is clicked"""
         self.server.stop()
         self.master.destroy()
 
     def on_select(self, _):
+        """agents_list on_select event handler, executed when selection in list changes"""
         print 'on select'
         if self.agents_list.curselection() is not ():
             self.button_shutdown.config(state=tk.NORMAL)
@@ -124,9 +105,9 @@ class App(tk.Frame):
             self.button_feed.config(state=tk.DISABLED)
             self.info_name.config(text='-')
             self.info_logic.config(text='-')
-            self.info_feed.config(text='-')
 
     def b_shutdown(self):
+        """send shutdown command to selected agent, executed on [Shutdown] button clicked"""
         for agent in self.server.agents:
             if agent.agent_name == self.agents_list.get(tk.ACTIVE):
                 agent.shutdown()
@@ -135,31 +116,24 @@ class App(tk.Frame):
                 break
 
     def b_switch_logic(self):
+        """send switch logic command to selected agent, executed on [Logic] button clicked"""
         for agent in self.server.agents:
             if agent.agent_name == self.agents_list.get(tk.ACTIVE):
                 agent.switch_logic()
                 break
 
-    def b_switch_feed(self):
-        for agent in self.server.agents:
-            if agent.agent_name == self.agents_list.get(tk.ACTIVE):
-                agent.switch_feed()
-                break
-
-    def b_detect(self):
-        for agent in self.server.agents:
-            if agent.agent_name == self.agents_list.get(tk.ACTIVE):
-                agent.detect()
-                break
-
     def b_up(self):
+        """stub for remote control"""
         pass
 
     def b_left(self):
+        """stub for remote control"""
         pass
 
     def b_right(self):
+        """stub for remote control"""
         pass
 
     def b_stop(self):
+        """stub for remote control"""
         pass

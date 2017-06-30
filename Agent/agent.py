@@ -1,3 +1,6 @@
+"""Data model for logger"""
+
+
 class Agent:
 
     def __init__(self, id, name, description, type, sensor_list):

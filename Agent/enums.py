@@ -1,3 +1,4 @@
+"""All enums used by agent"""
 from enum import Enum
 
 

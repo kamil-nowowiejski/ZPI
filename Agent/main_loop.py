@@ -1,3 +1,4 @@
+"""Main loop and logic of agent"""
 import cv2
 import logger as log
 from agent import Agent, Sensor
@@ -13,6 +14,7 @@ class Main:
     debug_tcp = True
     debug_db = True
     debug_arduino = True
+    # setting stop value to [True] stops agent, debug values enable/disable debug messages
 
     def __init__(self):
         self.server = TCPAgent(self)
@@ -20,6 +22,7 @@ class Main:
         self.camera_manager = None
 
     def _setup(self):
+        """Pre-loop actions"""
         # sensors = []
         # for sensor in ares('agent_info\\sensors'):
         #    sensors.append(Sensor(sensor['name'], sensor['accuracy'], sensor['unit_type'], sensor['type']))
@@ -35,13 +38,24 @@ class Main:
             self.stop[0] = True
 
     def _clean(self):
+        """Post-loop actions"""
         self.move.close()
         self.server.stop()
 
     def _loop(self):
-        sleep(2)
+        """Main loop"""
         while not self.stop[0]:
             cont = False
+
+            sleep(2)
+            """single step consists of:
+                - checking for aruco
+                - going to marker, looking for objects and turning away if found
+                - executing step if marker not found
+                - going to next step if everything ok
+                - starting loop from beginning after observing marker or encountering error
+                - exiting loop is stuck
+            """
             self.aruco()
             if self.stop[0]:
                 break
@@ -111,12 +125,14 @@ class Main:
         sleep(10)
 
     def observe(self):
+        """Take picture and send to server to extract objects"""
         self.camera_manager = cv2.VideoCapture(0)
         _, image = self.camera_manager.read()
         self.camera_manager.release()
         self.server.process_image(image)
 
     def aruco(self):
+        """Take picture, send to server to extract aruco data and wait for response"""
         self.camera_manager = cv2.VideoCapture(0)
         _, image = self.camera_manager.read()
         self.camera_manager.release()
@@ -132,8 +148,7 @@ class Main:
         self.server.received_aruco_answer = False
 
     def run(self):
+        """start agent (use start_agent.py)"""
         self._setup()
         self._loop()
-        # self.observe()
-        # sleep(10)
         self._clean()

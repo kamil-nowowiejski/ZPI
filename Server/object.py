@@ -3,6 +3,7 @@ import enums as enums
 
 
 class Object:
+    """Basic object class. Doesn't define any features."""
 
     def __init__(self, id, name=''):
         self.id = id
@@ -10,6 +11,7 @@ class Object:
 
 
 class Shape(Object):
+    """Shape object"""
 
     def __init__(self, type, width, height, color, pattern, pattern_color, symbols=[], id=None):
         Object.__init__(self, id)
@@ -93,6 +95,7 @@ class Shape(Object):
 
     @staticmethod
     def from_repr(string, offset=0):
+        """create shape from string representation returned by repr()"""
         parts = string.split('|')
         obj_type = enums.Shape.NONE
         obj_width = enums.Size.NONE
@@ -123,6 +126,7 @@ class Shape(Object):
 
 
 class CombinedObject(Object):
+    """Object combined from adjacent shapes"""
 
     def __init__(self, type, width, height, parts=[], id=None):
         Object.__init__(self, id)
@@ -155,6 +159,7 @@ class CombinedObject(Object):
 
     @staticmethod
     def from_repr(string, offset=0):
+        """create shape from string representation returned by repr()"""
         parts = string.split('|')
         obj_type = enums.Shape.NONE
         obj_width = enums.Size.NONE

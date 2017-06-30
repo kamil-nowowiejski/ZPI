@@ -1,3 +1,4 @@
+"""Communication with agents"""
 import socket
 import numpy as np
 from threading import Thread
@@ -15,6 +16,7 @@ from aruco_detector import MarkerDetector
 
 
 class TCPServer(Thread):
+    """Base server class"""
 
     def __init__(self, address):
         super(TCPServer, self).__init__()
@@ -28,12 +30,14 @@ class TCPServer(Thread):
         self._stop = True
 
     def run(self):
+        """Main loop of server. Never start server using run, use start instead"""
         while not self._stop:
             sleep(1)
         self.send_socket.close()
         self.receive_socket.close()
 
     def _send(self, message):
+        """Send message to connected server"""
         message = '%d|%s' % (len(message), message)
         self.send_socket.sendall(message)
         if len(message) > 60:
@@ -41,6 +45,7 @@ class TCPServer(Thread):
         print '%s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
+        """Receive message from connected server"""
         chunks = ''
         command = ''
         if self._overflow is not None:
@@ -80,6 +85,7 @@ class TCPServer(Thread):
 
 
 class TCPServerManager(TCPServer):
+    """Server managing connections with agents"""
 
     def __init__(self, context):
         super(TCPServerManager, self).__init__((res('tcp_server\\ip'), res('tcp_server\\server_port')))
@@ -94,6 +100,10 @@ class TCPServerManager(TCPServer):
         super(TCPServerManager, self).stop()
 
     def run(self):
+        """Main loop of server. Never start server using run, use start instead
+
+        Listen for registration requests from agents and create threads for them
+        """
         self.receive_socket.bind(self.address)
         self.receive_socket.settimeout(0.5)
         self.receive_socket.listen(1)
@@ -129,6 +139,7 @@ class TCPServerManager(TCPServer):
 
 
 class TCPServerAgent(TCPServer):
+    """Server maintaining connection with specific agent"""
 
     def __init__(self, context, send_address, name):
         super(TCPServerAgent, self).__init__(('', 0))
@@ -141,6 +152,10 @@ class TCPServerAgent(TCPServer):
         self.feed = False
 
     def run(self):
+        """Main loop of server. Never start server using run, use start instead
+
+        Establish communication with agent on new port and start listening for messages
+        """
         self.receive_socket.bind(self.address)
         self.send_socket.connect(self.send_address)
         self.address = (res('tcp_server\\ip'), self.receive_socket.getsockname()[1])
@@ -172,50 +187,17 @@ class TCPServerAgent(TCPServer):
         print 'agent server stopped'
 
     def process_request(self, message):
+        """Process messages from agent"""
         if message == 'LOGIC_ON':
+            # Acknowledge agent logic change
             self.autonomous = True
             self.context.update_info()
         elif message == 'LOGIC_OFF':
+            # Acknowledge agent logic change
             self.autonomous = False
             self.context.update_info()
-        elif message == 'FEED_ON':
-            self.feed = True
-            self.context.update_info()
-        elif message == 'FEED_OFF':
-            self.feed = False
-            self.context.update_info()
-        elif self.feed and message.split('|')[0] == 'FEED':
-            image = np.load(StringIO(message[5:]))['frame']
-            b, g, r = cv2.split(image)
-            image = cv2.merge((r, g, b))
-            image = Image.fromarray(image)
-            image = ImageTk.PhotoImage(image=image)
-            self.context.video_feed.create_image(480, 320, image=image)
-            self.context.video_feed.frame = image
-        elif message.split('|')[0] == 'DETECT':
-            message = message.split('|')
-            objects = []
-            offset = 2
-            for i in range(int(message[1])):
-                type = int(message[offset])
-                height = int(message[offset + 1])
-                width = int(message[offset + 2])
-                color = int(message[offset + 3])
-                symbol_count = int(message[offset + 4])
-                offset += 5
-                symbols = []
-                for j in range(symbol_count):
-                    s_type = int(message[offset])
-                    s_height = int(message[offset + 1])
-                    s_width = int(message[offset + 2])
-                    s_color = int(message[offset + 3])
-                    offset += 4
-                    symbols.append(Shape(enums.Shape(s_type), enums.Size(s_height),
-                                         enums.Size(s_width), enums.Color(s_color)))
-                objects.append(Shape(enums.Shape(type), enums.Size(height),
-                                     enums.Size(width), enums.Color(color), symbols))
-            self.context.show_detected(objects)
         elif message.split('|')[0] == 'ARUCO':
+            # Extract and send aruco data in received image, display image
             image = np.load(StringIO(message[6:]))['frame']
             b, g, r = cv2.split(image)
             tk_image = cv2.merge((r, g, b))
@@ -235,6 +217,7 @@ class TCPServerAgent(TCPServer):
                     send += '|%f' % sc
                 self._send(send)
         elif message.split('|')[0] == 'PROCESS':
+            # Detect and send objects in received image, display image
             image = np.load(StringIO(message[8:]))['frame']
             b, g, r = cv2.split(image)
             tk_image = cv2.merge((r, g, b))
@@ -250,6 +233,7 @@ class TCPServerAgent(TCPServer):
             self._send(message)
 
     def shutdown(self):
+        """Send shutdown command to agent"""
         self._send('SHUTDOWN')
         for i in range(self.context.agents_list.size()):
             if self.context.agents_list.get(i) == self.agent_name:
@@ -258,19 +242,11 @@ class TCPServerAgent(TCPServer):
         self.stop()
 
     def switch_logic(self):
+        """Send logic switch command to agent"""
         if self.autonomous:
             self._send('LOGIC_OFF')
         else:
             self._send('LOGIC_ON')
-
-    def switch_feed(self):
-        if self.feed:
-            self._send('FEED_OFF')
-        else:
-            self._send('FEED_ON')
-
-    def detect(self):
-        self._send('DETECT')
 
     def __str__(self):
         return self.agent_name

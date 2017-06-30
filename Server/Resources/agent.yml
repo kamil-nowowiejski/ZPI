@@ -1,4 +1,7 @@
 # Agent resources
+# This file is used to get camera data and parameters adapted to it
+# This should be stored in Agent/Resources/agent.yml and send to server during registration
+# This file should be deleted
 #
 # resource  res_name: resource
 #

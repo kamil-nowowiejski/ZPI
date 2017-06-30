@@ -1,3 +1,4 @@
+"""Start agent"""
 from Agent import main_loop
 
 

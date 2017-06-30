@@ -1,3 +1,4 @@
+"""All enums used by server"""
 from enum import Enum
 
 

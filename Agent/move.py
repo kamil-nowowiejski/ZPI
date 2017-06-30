@@ -1,8 +1,10 @@
+"""High level agent movement control API"""
 from time import sleep
 import arduino
 
 
 class Move:
+    """Wrapper of ArduinoServer"""
 
     def __init__(self):
         self.server = arduino.ArduinoServer()
@@ -15,6 +17,14 @@ class Move:
         self.server.close()
 
     def go(self, distance):
+        """Move forward specified distance in centimeters
+
+        if error is encountered cont is returned with value True, main loop starts from beginning
+        if obstacle is encountered agent tries to turn away
+            if agent still facing obstacle stop is returned with value True, main loops exits and agent stops
+            if agent turned away cont is returned with value True, main loop starts from beginning
+        if everything is ok both values are returned with value False, main loop goes to next step
+        """
         self.server.go_distance(distance)
         self.server.queue = []
         cont = False
@@ -42,6 +52,12 @@ class Move:
         return stop, cont
 
     def turn(self, angle):
+        """Turn for angle. Right if positive, left if negative.
+
+                if error is encountered cont is returned with value True, main loop starts from beginning
+                if everything is ok both values are returned with value False, main loop goes to next step
+                turn on arduino doesn't check for obstacles
+                """
         self.server.turn(angle)
         self.server.queue = []
         cont = False
@@ -62,6 +78,7 @@ class Move:
         return stop, cont
 
     def obstacle(self):
+        """Try to turn away from obstacle. Return True if succeed, False otherwise."""
         self.server.turn(135)
         while True:
             event = self.server.event
@@ -83,6 +100,19 @@ class Move:
                     return False
 
     def drive_to_marker(self, rvec, tvec):
+        """Drive to detected aruco marker.
+
+        :param rvec: angles extracted from marker
+        :param tvec: distances extracted from marker
+
+        algorithm:
+            turn to be parallel to marker
+            turn 90 degrees to be perpendicular to marker facing to markers axis
+            go forward to the axis
+            turn 90 degrees to face marker
+            if distance to marker is greater than 50cm go forward
+            return True if everything ok
+        """
         self.server.turn(rvec[1])
         self.server.queue = []
         err = False

@@ -3,7 +3,7 @@ import yaml
 
 
 def res(path):
-    """Return resource to which the path points
+    """Return resource from resources.yml file to which the path points
     
     examples:
     res('item')         get resource named 'item'
@@ -21,9 +21,8 @@ def res(path):
 
 
 def ares(path):
-    """Return agent resource to which the path points"""
-    # with open('Agent/Resources/agent.yml', 'r') as resources_file:
-    with open('Resources/agent.yml', 'r') as resources_file:
+    """Return agent resource from agent.yml file to which the path points"""
+    with open('Agent/Resources/agent.yml', 'r') as resources_file:
         resource = yaml.load(resources_file)
         split = path.split('\\')
         for part in split:

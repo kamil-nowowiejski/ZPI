@@ -1,13 +1,13 @@
 """Database storage system"""
 import sqlite3 as sql
 from os.path import isfile
-
 import enums
 from object import Shape, CombinedObject
 from resources import res
 
 
 def _create_database():
+    """Create database from Resources/SQL/create.sql script"""
     connection = sql.connect(res('sql\\connection'))
     with open(res('sql\\create'), 'r') as script:
         create = script.read().replace('\n', ' ').split(';')
@@ -18,6 +18,7 @@ def _create_database():
 
 
 def _connect():
+    """Connect to database or create and connect to database if one doesn't exist"""
     if not isfile(res('sql\\connection')):
         _create_database()
     return sql.connect(res('sql\\connection'))

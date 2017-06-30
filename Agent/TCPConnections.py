@@ -1,3 +1,4 @@
+"""Communication with image processing server"""
 import socket
 from threading import Thread
 from time import sleep
@@ -11,6 +12,7 @@ import database as db
 
 
 class TCPServer(Thread):
+    """Base server class"""
 
     def __init__(self, address):
         super(TCPServer, self).__init__()
@@ -24,12 +26,14 @@ class TCPServer(Thread):
         self._stop = True
 
     def run(self):
+        """Main loop of server. Never start server using run, use start instead"""
         while not self._stop:
             sleep(1)
         self.send_socket.close()
         self.receive_socket.close()
 
     def _send(self, message):
+        """Send message to connected server"""
         message = '%d|%s' % (len(message), message)
         self.send_socket.sendall(message)
         if len(message) > 60:
@@ -38,6 +42,7 @@ class TCPServer(Thread):
             print '[TCP] %s:%d -> %s' % (self.send_socket.getsockname()[0], self.send_socket.getsockname()[1], message)
 
     def _receive(self, connection):
+        """Receive message from connected server"""
         chunks = ''
         command = ''
         if self._overflow is not None:
@@ -78,6 +83,7 @@ class TCPServer(Thread):
 
 
 class TCPAgent(TCPServer):
+    """Server maintaining connection with image processing server"""
 
     def __init__(self, context):
         super(TCPAgent, self).__init__(('', 0))
@@ -91,6 +97,10 @@ class TCPAgent(TCPServer):
         self.received_aruco_answer = False
 
     def run(self):
+        """Main loop of server. Never start server using run, use start instead
+
+        Connect to server, register self and start listening for messages
+        """
         self.receive_socket.bind(self.address)
         self.receive_socket.settimeout(2)
         self.receive_socket.listen(1)
@@ -131,7 +141,9 @@ class TCPAgent(TCPServer):
         self.receive_socket.close()
 
     def process_request(self, message):
+        """Process messages from server"""
         if message.split('|')[0] == 'REGISTER':
+            # change sending socket to new port send by server
             send_address = (message.split('|')[1].split(':')[0], int(message.split('|')[1].split(':')[1]))
             self.send_socket.close()
             self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -140,20 +152,18 @@ class TCPAgent(TCPServer):
             if main_loop.Main.debug_tcp:
                 print '[TCP] Server connected'
         elif message == 'SHUTDOWN':
+            # notify main loop to stop agent
             main_loop.Main.stop[0] = True
         elif message == 'LOGIC_ON':
+            # enable autonomous behavior of agent (currently unused)
             self.autonomous = True
             self._send('LOGIC_ON')
         elif message == 'LOGIC_OFF':
+            # disable autonomous behavior of agent (currently unused)
             self.autonomous = False
             self._send('LOGIC_OFF')
-        elif message == 'FEED_ON':
-            self.feed = True
-            self._send('FEED_ON')
-        elif message == 'FEED_OFF':
-            self.feed = False
-            self._send('FEED_OFF')
         elif message.split('|')[0] == 'ARUCO':
+            # receive aruco data from send image
             parts = message.split('|')
             if parts[1] == 'None':
                 self.aruco = None
@@ -163,6 +173,7 @@ class TCPAgent(TCPServer):
             self.has_aruco = True
             self.received_aruco_answer = True
         elif message.split('|')[0] == 'PROCESS':
+            # receive objects detected on send image and put them into database
             parts = message.split('|')
             objects = []
             offset = 3
@@ -178,14 +189,8 @@ class TCPAgent(TCPServer):
                 if main_loop.Main.debug_db:
                     print '[SQL] %s' % str(obj)
 
-    def send_feed(self, image):
-        sio = StringIO()
-        np.savez_compressed(sio, frame=image)
-        sio.seek(0)
-        data = sio.read()
-        self._send('FEED|%s' % data)
-
     def find_aruco(self, image):
+        """Send image to extract aruco data"""
         sio = StringIO()
         np.savez_compressed(sio, frame=image)
         sio.seek(0)
@@ -193,6 +198,7 @@ class TCPAgent(TCPServer):
         self._send('ARUCO|%s' % data)
 
     def process_image(self, image):
+        """Send image to extract objects"""
         sio = StringIO()
         np.savez_compressed(sio, frame=image)
         sio.seek(0)
