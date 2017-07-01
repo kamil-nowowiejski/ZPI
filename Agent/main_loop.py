@@ -48,14 +48,13 @@ class Main:
             cont = False
 
             sleep(2)
-            """single step consists of:
-                - checking for aruco
-                - going to marker, looking for objects and turning away if found
-                - executing step if marker not found
-                - going to next step if everything ok
-                - starting loop from beginning after observing marker or encountering error
-                - exiting loop is stuck
-            """
+            # single step consists of:
+            #   - checking for aruco
+            #   - going to marker, looking for objects and turning away if found
+            #   - executing step if marker not found
+            #   - going to next step if everything ok
+            #   - starting loop from beginning after observing marker or encountering error
+            #   - exiting loop is stuck
             self.aruco()
             if self.stop[0]:
                 break
