@@ -45,83 +45,88 @@ class Main:
     def _loop(self):
         """Main loop"""
         while not self.stop[0]:
-            cont = False
-
-            sleep(2)
-            # single step consists of:
-            #   - checking for aruco
-            #   - going to marker, looking for objects and turning away if found
-            #   - executing step if marker not found
-            #   - going to next step if everything ok
-            #   - starting loop from beginning after observing marker or encountering error
-            #   - exiting loop is stuck
-            self.aruco()
-            if self.stop[0]:
-                break
-            self.server.has_aruco = False
-            if self.server.aruco is not None:
-                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
-                    self.observe()
-                    self.move.turn(135)
-                continue
-            self.stop[0], cont = self.move.go(33)
-            if self.stop[0]:
-                break
-            if cont:
-                continue
-
-            self.aruco()
-            if self.stop[0]:
-                break
-            self.server.has_aruco = False
-            if self.server.aruco is not None:
-                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
-                    self.observe()
-                    self.move.turn(135)
-                continue
-            self.stop[0], cont = self.move.turn(66)
-            if self.stop[0]:
-                break
-            if cont:
-                continue
-
-            self.aruco()
-            if self.stop[0]:
-                break
-            self.server.has_aruco = False
-            if self.server.aruco is not None:
-                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
-                    self.observe()
-                    self.move.turn(135)
-                continue
-            self.stop[0], cont = self.move.turn(-132)
-            if self.stop[0]:
-                break
-            if cont:
-                continue
-
-            self.aruco()
-            if self.stop[0]:
-                break
-            self.server.has_aruco = False
-            if self.server.aruco is not None:
-                if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
-                    self.observe()
-                    self.move.turn(135)
-                continue
-            self.stop[0], cont = self.move.turn(66)
-            if self.stop[0]:
-                break
-            if cont:
-                continue
-
-            self.stop[0], cont = self.move.turn(random.randint(-180, 180))
-            if self.stop[0]:
-                break
-            if cont:
-                continue
-
+            if logic_on:
+                self.logic()
+            else:
+                sleep(1)
         sleep(10)
+
+    def logic(self):
+        cont = False
+
+        sleep(2)
+        # single step consists of:
+        #   - checking for aruco
+        #   - going to marker, looking for objects and turning away if found
+        #   - executing step if marker not found
+        #   - going to next step if everything ok
+        #   - starting loop from beginning after observing marker or encountering error
+        #   - exiting loop is stuck
+        self.aruco()
+        if self.stop[0]:
+            break
+        self.server.has_aruco = False
+        if self.server.aruco is not None:
+            if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                self.observe()
+                self.move.turn(135)
+            continue
+        self.stop[0], cont = self.move.go(33)
+        if self.stop[0]:
+            break
+        if cont:
+            continue
+
+        self.aruco()
+        if self.stop[0]:
+            break
+        self.server.has_aruco = False
+        if self.server.aruco is not None:
+            if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                self.observe()
+                self.move.turn(135)
+            continue
+        self.stop[0], cont = self.move.turn(66)
+        if self.stop[0]:
+            break
+        if cont:
+            continue
+
+        self.aruco()
+        if self.stop[0]:
+            break
+        self.server.has_aruco = False
+        if self.server.aruco is not None:
+            if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                self.observe()
+                self.move.turn(135)
+            continue
+        self.stop[0], cont = self.move.turn(-132)
+        if self.stop[0]:
+            break
+        if cont:
+            continue
+
+        self.aruco()
+        if self.stop[0]:
+            break
+        self.server.has_aruco = False
+        if self.server.aruco is not None:
+            if self.move.drive_to_marker(self.server.aruco[0], self.server.aruco[1]):
+                self.observe()
+                self.move.turn(135)
+            continue
+        self.stop[0], cont = self.move.turn(66)
+        if self.stop[0]:
+            break
+        if cont:
+            continue
+
+        self.stop[0], cont = self.move.turn(random.randint(-180, 180))
+        if self.stop[0]:
+            break
+        if cont:
+            continue
 
     def observe(self):
         """Take picture and send to server to extract objects"""

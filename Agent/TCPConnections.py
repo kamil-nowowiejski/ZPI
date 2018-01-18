@@ -9,6 +9,7 @@ from cStringIO import StringIO
 from object import Shape, CombinedObject
 import errno
 import database as db
+import sender
 
 
 class TCPServer(Thread):
@@ -174,6 +175,7 @@ class TCPAgent(TCPServer):
             self.received_aruco_answer = True
         elif message.split('|')[0] == 'PROCESS':
             # receive objects detected on send image and put them into database
+
             parts = message.split('|')
             objects = []
             offset = 3
@@ -184,10 +186,13 @@ class TCPAgent(TCPServer):
                     obj, offset = CombinedObject.from_repr(message, offset)
                 objects.append(obj)
                 offset += 1
+        if self.context.logic_on:
             for obj in objects:
                 db.insert(obj)
                 if main_loop.Main.debug_db:
                     print '[SQL] %s' % str(obj)
+        else:
+            sender.send_data(objects)
 
     def find_aruco(self, image):
         """Send image to extract aruco data"""
