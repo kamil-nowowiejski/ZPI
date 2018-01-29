@@ -1,6 +1,7 @@
 """Main loop and logic of agent"""
 import cv2
 import logger as log
+from Agent.serwer import Serv
 from agent import Agent, Sensor
 from move import Move
 from time import sleep
@@ -154,5 +155,6 @@ class Main:
     def run(self):
         """start agent (use start_agent.py)"""
         self._setup()
+        server = Serv()
         self._loop()
         self._clean()
