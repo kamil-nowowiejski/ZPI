@@ -185,6 +185,8 @@ class TCPAgent(TCPServer):
                 else:
                     obj, offset = CombinedObject.from_repr(message, offset)
                 objects.append(obj)
+                #wyslanie obiektow na smartfona
+                sender.send_data(obj)
                 offset += 1
         if self.context.logic_on:
             for obj in objects:

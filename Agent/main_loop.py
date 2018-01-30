@@ -155,6 +155,6 @@ class Main:
     def run(self):
         """start agent (use start_agent.py)"""
         self._setup()
-        server = Serv()
+        server = Serv(self.move, self)
         self._loop()
         self._clean()

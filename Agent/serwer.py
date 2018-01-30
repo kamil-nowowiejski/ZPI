@@ -1,10 +1,13 @@
 import threading
 from time import sleep
-
 from flask import Flask, app, request
+
+import sender
 
 
 class Serv:
+
+    ip_addr = ""
 
     def __init__(self, move, main):
 
@@ -20,6 +23,7 @@ class Serv:
             return "OK"
 
         def async_execute(json):
+            observes = False
             for action in json["actions"]:
                 if action["type"] == "move":
                     print("jedz " + str(action["value"]))
@@ -30,8 +34,13 @@ class Serv:
                     self.move.turn(action["value"])
                     # skrec
                 if action["type"] == "observe":
+                    observes = True
                     print("obserwuj " + json["ip"])
                     # obserwuj
+                    Serv.ip_addr = json["ip"]
                     self.main.observe()
+            if observes == False:
+                sender.notifyFinish()
+
 
         app.run(debug=True)
