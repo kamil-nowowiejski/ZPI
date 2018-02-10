@@ -8,12 +8,17 @@ import sender
 class Serv:
 
     ip_addr = ""
+    status = "idle"
 
     def __init__(self, move, main):
 
         app = Flask("aaa")
         self.main = main
         self.move = move
+
+        @app.route("/", methods=['GET'])
+        def check_status():
+            return self.status
 
         @app.route("/", methods=['POST'])
         def turn_left():
@@ -24,6 +29,7 @@ class Serv:
 
         def async_execute(json):
             observes = False
+            self.status = "working"
             for action in json["actions"]:
                 if action["type"] == "move":
                     print("jedz " + str(action["value"]))
@@ -39,8 +45,10 @@ class Serv:
                     # obserwuj
                     Serv.ip_addr = json["ip"]
                     self.main.observe()
+                    self.status = "idle"
             if observes == False:
                 sender.notifyFinish()
+                self.status = "idle"
 
 
         app.run(debug=True)
