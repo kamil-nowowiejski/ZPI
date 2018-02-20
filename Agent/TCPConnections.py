@@ -9,7 +9,7 @@ from cStringIO import StringIO
 from object import Shape, CombinedObject
 import errno
 import database as db
-import sender
+from Agent import sender
 
 
 class TCPServer(Thread):

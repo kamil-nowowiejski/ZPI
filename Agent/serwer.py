@@ -1,8 +1,7 @@
 import threading
-from time import sleep
-from flask import Flask, app, request
+from flask import Flask, request
 
-import sender
+from Agent import sender
 
 
 class Serv:
