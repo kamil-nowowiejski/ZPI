@@ -46,7 +46,7 @@ class Serv:
                     self.main.observe()
                     self.status = "idle"
             if observes == False:
-                sender.notifyFinish()
+                sender.notifyFinish(ip_addr=self.ip_addr)
                 self.status = "idle"
 
 

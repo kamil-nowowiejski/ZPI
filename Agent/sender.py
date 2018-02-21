@@ -2,15 +2,14 @@ import socket
 
 import requests
 from flask import json
-from Agent.serwer import Serv
 
 ip_addr = ""
 
-def send(obj):
+def send(obj, ip_addr):
     obj.ip = socket.gethostbyname(socket.gethostname())
-    r = requests.post(Serv.ip_addr, data = (json.dumps(obj)), headers = {'Content-Type': 'application/json'})
+    r = requests.post(ip_addr, data = (json.dumps(obj)), headers = {'Content-Type': 'application/json'})
 
-def notifyFinish():
+def notifyFinish(ip_addr):
     o = object()
     o.ip = socket.gethostbyname(socket.gethostname())
-    r = requests.put(Serv.ip_addr, data = json.dump(o), headers = {'Content-Type': 'application/json'})
+    r = requests.put(ip_addr, data = json.dump(o), headers = {'Content-Type': 'application/json'})
